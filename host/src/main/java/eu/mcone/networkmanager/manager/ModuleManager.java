@@ -8,142 +8,131 @@ package eu.mcone.networkmanager.manager;
 
 import eu.mcone.networkmanager.NetworkManager;
 import eu.mcone.networkmanager.api.NetworkModule;
-import eu.mcone.networkmanager.core.console.ConsoleColor;
-import eu.mcone.networkmanager.core.console.Logger;
-import eu.mcone.networkmanager.core.module.ModuleInfo;
-import eu.mcone.networkmanager.file.ModuleFileReader;
+import eu.mcone.networkmanager.console.ConsoleColor;
+import eu.mcone.networkmanager.console.Logger;
 import lombok.Getter;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class ModuleManager extends eu.mcone.networkmanager.api.manager.ModuleManager {
+public class ModuleManager implements eu.mcone.networkmanager.api.manager.ModuleManager {
 
-    private ModuleFileReader moduleFileReader;
-    /* ModuleName, ModuleMainClass */
-    private Map<String, ModuleInfo> modules = new HashMap<>();
     @Getter
-    private Boolean Running;
+    private List<NetworkModule> modules;
 
     public ModuleManager() {
-
+        modules = new ArrayList<>();
+        loadModules();
     }
 
-    public void loadModules() {
-        Logger.log("ModuleManager", ConsoleColor.GREEN + "Loading modules...");
-        try {
-            File[] modules = NetworkManager.HOME_DIR.listFiles();
-            if (modules != null) {
-                for (File module : modules) {
-                    JarFile jarFile = new JarFile(module);
-                    Enumeration<JarEntry> e = jarFile.entries();
+    private void loadModules() {
+        File[] modules = NetworkManager.HOME_DIR.listFiles();
 
-                    URL[] urls = {new URL("jar:file:" + module.getPath() + "!/")};
-                    URLClassLoader cl = URLClassLoader.newInstance(urls);
-
-                    while (e.hasMoreElements()) {
-                        JarEntry je = e.nextElement();
-                        if (je.isDirectory()) {
-                            if (je.getName().equals("module.yml")) {
-                                this.moduleFileReader = new ModuleFileReader(cl.getResourceAsStream("module.yml"));
-                            } else if (je.getName().endsWith(".class")) {
-                                Class<? extends NetworkModule> moduleMain = Class.forName(this.moduleFileReader.getModuleInfo().getModuleClass(), true, cl).asSubclass(NetworkModule.class);
-                                moduleMain.getMethod("onEnable").invoke(moduleMain.newInstance());
-                                this.modules.put(this.moduleFileReader.getModuleInfo().getModuleName(), this.moduleFileReader.getModuleInfo());
-                            } else {
-                                continue;
-                            }
-                        }
-
-                        // -6 because of .class
-                        String className = je.getName().substring(0, je.getName().length() - 6);
-                        className = className.replace('/', '.');
-                        cl.loadClass(className);
-                    }
+        if (modules != null) {
+            for (File module : modules) {
+                if (module.getName().endsWith(".jar")) {
+                    loadModule(module);
                 }
             }
-        } catch (IOException | ClassNotFoundException | InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-            Logger.err("ModuleManager", e.getMessage());
         }
     }
 
-    public void startModule(final String moduleName) {
+    @Override
+    public void loadModule(final File module) {
         try {
-            Logger.log("ModuleManager", ConsoleColor.GREEN + "Start module " + moduleName);
-            File moduleFile = new File(NetworkManager.HOME_DIR + moduleName);
-            JarFile jarFile = new JarFile(moduleFile);
+            Logger.log("ModuleManager", ConsoleColor.GREEN + "Loaded module " + module.getName());
+            JarFile jarFile = new JarFile(module);
             Enumeration<JarEntry> e = jarFile.entries();
 
-            URL[] urls = {new URL("jar:file:" + moduleFile.getPath() + "!/")};
-            URLClassLoader cl = URLClassLoader.newInstance(urls);
+            URLClassLoader cl = new URLClassLoader(new URL[]{module.toURI().toURL()});
+            Class<? extends NetworkModule> mainClass = null;
 
             while (e.hasMoreElements()) {
                 JarEntry je = e.nextElement();
-                if (je.isDirectory()) {
-                    if (je.getName().equals("module.yml")) {
-                        this.moduleFileReader = new ModuleFileReader(cl.getResourceAsStream("module.yml"));
-                    } else if (je.getName().endsWith(".class")) {
-                        Class<? extends NetworkModule> moduleMain = Class.forName(this.moduleFileReader.getModuleInfo().getModuleClass(), true, cl).asSubclass(NetworkModule.class);
-                        moduleMain.getMethod("onEnable").invoke(moduleMain.newInstance());
-                        this.modules.put(this.moduleFileReader.getModuleInfo().getModuleName(), this.moduleFileReader.getModuleInfo());
-                    } else {
-                        continue;
+                if (!je.isDirectory()) {
+                    if (je.getName().endsWith(".class")) {
+                        String className = je.getName().substring(0, je.getName().length() - 6);
+                        className = className.replace('/', '.');
+                        Class<?> loaded = cl.loadClass(className);
+
+                        try {
+                            mainClass = loaded.asSubclass(NetworkModule.class);
+                        } catch (ClassCastException ignored) {
+                        }
                     }
                 }
-
-                // -6 because of .class
-                /*
-                String className = je.getName().substring(0, je.getName().length() - 6);
-                className = className.replace('/', '.');
-                cl.loadClass(className);
-                */
             }
-        } catch (IOException | ClassNotFoundException | InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-            Logger.err("ModuleManager", e.getMessage());
-        }
-    }
 
-    public void stopModule(final String moduleName) {
-        try {
-            Logger.log("ModuleManager", ConsoleColor.GREEN + "Stop module " + moduleName + "...");
-            if (modules.containsKey(moduleName)) {
-                if (modules.get(moduleName).getRunning()) {
-                    Class<? extends NetworkModule> moduleClass = Class.forName(modules.get(moduleName).getModuleClass()).asSubclass(NetworkModule.class);
-                    moduleClass.getMethod("onDisable").invoke(moduleClass.newInstance());
-                } else {
-                    Logger.log("ModuleManager", ConsoleColor.RED + "The module with the module name " + moduleName + " has already been stopped");
-                }
+            cl.close();
+            if (mainClass != null) {
+                NetworkModule moduleObject = mainClass.newInstance();
+                moduleObject.getInfo().setFile(module);
+                enableModule(moduleObject);
+                this.modules.add(moduleObject);
             } else {
-                Logger.log("ModuleManager", ConsoleColor.RED + "There is no module with the module name" + moduleName);
+                throw new UnsupportedOperationException("Module does not contain Class extending NetworkModule. Aborting...");
             }
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | ClassNotFoundException e) {
-            Logger.err("ModuleManager", e.getMessage());
+        } catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
+            e1.printStackTrace();
         }
     }
 
-    public void stopModules() {
-        try {
-            Logger.log("ModuleManager", "Stop all working modules...");
-            for (ModuleInfo modules : this.modules.values()) {
-                if (modules.getRunning()) {
-                    Class<? extends NetworkModule> moduleClass = Class.forName(modules.getModuleClass()).asSubclass(NetworkModule.class);
-                    moduleClass.getMethod("onDisable").invoke(moduleClass.newInstance());
-                }
+    @Override
+    public void enableModule(final NetworkModule module) {
+        Logger.log("ModuleManager", ConsoleColor.GREEN + "Enabled module " + module.getInfo().getModuleName());
+        module.getInfo().setRunning(true);
+        module.onEnable();
+    }
+
+    @Override
+    public void disableModule(final NetworkModule module) {
+        Logger.log("ModuleManager", ConsoleColor.GREEN + "Stop module " + module.getInfo().getModuleName() + "...");
+        if (modules.contains(module)) {
+            if (module.getInfo().isRunning()) {
+                module.onDisable();
+                module.getInfo().setRunning(false);
+            } else {
+                Logger.log("ModuleManager", ConsoleColor.RED + "The module with the module name " + module.getInfo().getModuleName() + " has already been stopped");
             }
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException | ClassNotFoundException e) {
-            Logger.err("MoudleManager", e.getMessage());
+        } else {
+            Logger.log("ModuleManager", ConsoleColor.RED + "There is no module with the module name" + module.getInfo().getModuleName());
         }
     }
 
-    public Map<String, ModuleInfo> getModules() {
-        return this.modules;
+    public void reloadModule(final NetworkModule module) {
+        Logger.log(getClass(), ConsoleColor.GREEN + "Reload module " + module.getInfo().getModuleName());
+        if (module.getInfo().isRunning()) {
+            module.onDisable();
+        }
+        module.onEnable();
+    }
+
+    public void reloadModules() {
+        for (NetworkModule networkModule : modules) {
+            reloadModule(networkModule);
+        }
+    }
+
+    public void disableModules() {
+        Logger.log("ModuleManager", "Stop all working modules...");
+        for (NetworkModule module : this.modules) {
+            disableModule(module);
+        }
+    }
+
+    public NetworkModule getModule(final String moduleName) {
+        for (NetworkModule networkModule : modules) {
+            if (networkModule.getInfo().getModuleName().equalsIgnoreCase(moduleName)) {
+                return networkModule;
+            }
+        }
+        return null;
     }
 }

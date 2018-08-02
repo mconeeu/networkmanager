@@ -4,10 +4,12 @@
  *
  */
 
-package eu.mcone.networkmanager.core.module;
+package eu.mcone.networkmanager.api.module;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.File;
 
 public class ModuleInfo {
 
@@ -16,11 +18,14 @@ public class ModuleInfo {
     @Getter @Setter
     private String moduleName;
     @Getter @Setter
-    private Boolean running;
+    private boolean running;
+    @Getter @Setter
+    private File file;
 
-    public ModuleInfo(final String moduleClass, final String moduleName, final Boolean running) {
+    public ModuleInfo(final String moduleClass, final String moduleName, final boolean running, final File file) {
         this.moduleClass = moduleClass;
         this.moduleName = moduleName;
         this.running = running;
+        this.file = file;
     }
 }

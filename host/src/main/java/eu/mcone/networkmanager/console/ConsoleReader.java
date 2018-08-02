@@ -4,7 +4,7 @@
  *
  */
 
-package eu.mcone.networkmanager.core.console;
+package eu.mcone.networkmanager.console;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 public class ConsoleReader {
 
-    private Map<String, CommandExecutor> executors;
+    private Map<String, ConsoleCommandExecutor> executors;
 
     public ConsoleReader() {
         executors = new HashMap<>();
@@ -27,7 +27,7 @@ public class ConsoleReader {
                     Logger.log(getClass(), "new console input: '"+next+"'");
                     String[] line = next.split(" ");
 
-                    for (HashMap.Entry<String, CommandExecutor> e : executors.entrySet()) {
+                    for (HashMap.Entry<String, ConsoleCommandExecutor> e : executors.entrySet()) {
                         if (e.getKey() == null || e.getKey().equalsIgnoreCase(line[0])) {
                             e.getValue().onCommand(line[0], Arrays.copyOfRange(line, 1, line.length));
                         }
@@ -37,11 +37,11 @@ public class ConsoleReader {
         }).start();
     }
 
-    public void registerCommand(String cmd, CommandExecutor executor) {
+    public void registerCommand(String cmd, ConsoleCommandExecutor executor) {
         executors.put(cmd, executor);
     }
 
-    public void registerCommand(CommandExecutor executor) {
+    public void registerCommand(ConsoleCommandExecutor executor) {
         executors.put(null, executor);
     }
 

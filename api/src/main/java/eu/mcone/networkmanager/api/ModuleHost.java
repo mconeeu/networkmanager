@@ -17,7 +17,7 @@ public abstract class ModuleHost {
     private static ModuleHost instance;
 
     public static void setInstance(ModuleHost instance) {
-        if (ModuleHost.instance != null) {
+        if (ModuleHost.instance == null) {
             ModuleHost.instance = instance;
         } else {
             throw new IllegalStateException("ModuleHost instance was already set!");

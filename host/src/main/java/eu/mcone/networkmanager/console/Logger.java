@@ -4,7 +4,7 @@
  *
  */
 
-package eu.mcone.networkmanager.core.console;
+package eu.mcone.networkmanager.console;
 
 import java.io.PrintStream;
 
