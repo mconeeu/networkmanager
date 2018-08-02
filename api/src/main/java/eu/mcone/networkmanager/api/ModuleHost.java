@@ -6,6 +6,7 @@
 
 package eu.mcone.networkmanager.api;
 
+import eu.mcone.networkmanager.api.manager.ModuleManager;
 import lombok.Getter;
 
 import java.util.concurrent.ExecutorService;
@@ -25,4 +26,7 @@ public abstract class ModuleHost {
 
     public abstract ExecutorService getThreadPool();
 
+    public abstract ModuleManager getModuleManager();
+
+    public abstract void shutdown();
 }

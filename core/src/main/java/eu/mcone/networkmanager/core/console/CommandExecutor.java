@@ -4,11 +4,10 @@
  *
  */
 
-package eu.mcone.networkmanager.api;
+package eu.mcone.networkmanager.core.console;
 
-public abstract class NetworkModule {
+public interface CommandExecutor {
 
-    public abstract void onEnable();
+    void onCommand(String cmd, String[] args);
 
-    public abstract void onDisable();
 }
