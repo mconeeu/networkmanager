@@ -11,6 +11,8 @@ import eu.mcone.networkmanager.console.ConsoleCommandExecutor;
 import eu.mcone.networkmanager.console.ConsoleColor;
 import eu.mcone.networkmanager.console.ConsoleReader;
 import eu.mcone.networkmanager.console.Logger;
+import eu.mcone.networkmanager.database.Database;
+import eu.mcone.networkmanager.database.MongoDBManager;
 import eu.mcone.networkmanager.manager.ModuleManager;
 import lombok.Getter;
 
@@ -30,19 +32,24 @@ public class NetworkManager extends ModuleHost {
     private ConsoleReader consoleReader;
     @Getter
     private ExecutorService threadPool;
+    @Getter
+    private MongoDBManager mongoDBManager;
 
     private NetworkManager() {
         setInstance(this);
         manager = this;
 
-        this.threadPool = Executors.newCachedThreadPool();
+        threadPool = Executors.newCachedThreadPool();
 
-        this.consoleReader = new ConsoleReader();
-        this.consoleReader.registerCommand(new ConsoleCommandExecutor());
+        consoleReader = new ConsoleReader();
+        consoleReader.registerCommand(new ConsoleCommandExecutor());
 
         Logger.log("Enabel progress", ConsoleColor.CYAN + "Welcome to mc1-networkmanager. System is starting...");
 
-        //TODO: Add MongoDB database
+        Logger.log(getClass(), ConsoleColor.GREEN + "Start connection to MongoDatabase...");
+        mongoDBManager = new MongoDBManager(Database.SYSTEM);
+
+        Logger.log(getClass(), ConsoleColor.GREEN + "Start moduleManager...");
         moduleManager = new ModuleManager();
     }
 
@@ -57,8 +64,8 @@ public class NetworkManager extends ModuleHost {
         Logger.log("Shutdown progress", "Stop Netty server...");
         //TODO: Close Netty Server her
 
-        Logger.log("Shutdown progress", "Close MongoDB connection...");
-        //TODO: Close MongoDB Connection her
+        Logger.log("Shutdown progress", "Close connection to database...");
+        this.mongoDBManager.closeConnection();
 
         Logger.log("Shutdown progress", "Good bye!");
         System.exit(0);
