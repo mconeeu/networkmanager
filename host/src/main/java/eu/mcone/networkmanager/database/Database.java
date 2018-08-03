@@ -8,10 +8,7 @@ package eu.mcone.networkmanager.database;
 
 public enum  Database {
 
-    SYSTEM("mc1system", "", "", "", 27017),
-    DATA("mc1data", "", "", "", 27017),
-    STATS("mc1stats", "", "", "", 27017),
-    CLOUD("mc1cloud", "", "", "", 27017);
+    SYSTEM("admin", "T6KIq8gjmmF1k7futx0cJiJinQXgfguYXruds1dFx1LF5IsVPQjuDTnlI1zltpD9", "admin", "db.mcone.eu", 27017);
 
     private final String username;
     private final String password;

@@ -7,8 +7,8 @@
 package eu.mcone.networkmanager;
 
 import eu.mcone.networkmanager.api.ModuleHost;
-import eu.mcone.networkmanager.console.ConsoleCommandExecutor;
 import eu.mcone.networkmanager.console.ConsoleColor;
+import eu.mcone.networkmanager.console.ConsoleCommandExecutor;
 import eu.mcone.networkmanager.console.ConsoleReader;
 import eu.mcone.networkmanager.console.Logger;
 import eu.mcone.networkmanager.database.Database;
@@ -44,13 +44,14 @@ public class NetworkManager extends ModuleHost {
         consoleReader = new ConsoleReader();
         consoleReader.registerCommand(new ConsoleCommandExecutor());
 
-        Logger.log("Enabel progress", ConsoleColor.CYAN + "Welcome to mc1-networkmanager. System is starting...");
+        Logger.log("Enable progress", ConsoleColor.CYAN + "Welcome to mc1-networkmanager. System is starting...");
 
         Logger.log(getClass(), ConsoleColor.GREEN + "Start connection to MongoDatabase...");
         mongoDBManager = new MongoDBManager(Database.SYSTEM);
+        mongoDBManager.connectAuthentication();
 
         Logger.log(getClass(), ConsoleColor.GREEN + "Start moduleManager...");
-        moduleManager = new ModuleManager();
+        //moduleManager = new ModuleManager();
     }
 
     public static void main(String[] args) {

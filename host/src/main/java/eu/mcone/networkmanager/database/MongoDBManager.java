@@ -6,15 +6,19 @@
 
 package eu.mcone.networkmanager.database;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.async.client.MongoClient;
-import com.mongodb.async.client.MongoClients;
-import com.mongodb.async.client.MongoCollection;
-import com.mongodb.async.client.MongoDatabase;
+import com.mongodb.MongoException;
+import com.mongodb.client.*;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
+import eu.mcone.networkmanager.console.Logger;
 import lombok.Getter;
 import org.bson.Document;
 
-import java.text.MessageFormat;
+import java.util.List;
+
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.combine;
+import static com.mongodb.client.model.Updates.set;
 
 public class MongoDBManager implements eu.mcone.networkmanager.api.database.MongoDBManager {
 
@@ -45,31 +49,124 @@ public class MongoDBManager implements eu.mcone.networkmanager.api.database.Mong
         this.database = database.getDatabase();
     }
 
+    @Override
     public void connect() {
-        this.client = MongoClients.create(new ConnectionString(MessageFormat.format("mongodb://{0}:{1}", host, port)));
+        this.client = MongoClients.create("mongodb://" + host + ":" + port + "");
     }
 
+    @Override
     public void connectAuthentication() {
-        this.client = MongoClients.create(new ConnectionString(MessageFormat.format("mongodb://{0}:{1}@{3}:{4}/{5}", username, password, host, port, database)));
+        this.client = MongoClients.create("mongodb://" + username + ":" + password + "@" + host + ":" + port + "/" + database + "");
+        this.mongoDatabase = this.client.getDatabase("mc1system");
     }
 
+    @Override
     public void connectAuthentication(final String username, final String password, final String database) {
-        this.client = MongoClients.create(new ConnectionString(MessageFormat.format("mongodb://{0}:{1}@{3}:{4}/{5}", username, password, host, port, database)));
+        this.client = MongoClients.create("mongodb://" + username + ":" + password + "@" + host + ":" + port + "/" + database + "");
     }
 
+    @Override
     public void closeConnection() {
         this.client.close();
     }
 
-    public MongoDatabase getDatabase(final String database) {
-        this.mongoDatabase = this.client.getDatabase(database);
+    @Override
+    public MongoDatabase getMongoDatabase(final String database) {
+        return this.client.getDatabase(database);
+    }
+
+    @Override
+    public MongoDatabase getMongoDatabase() {
         return this.mongoDatabase;
     }
 
-    public MongoCollection<Document> getCollection(final String key) {
-        return this.mongoDatabase.getCollection(key);
+    @Override
+    public void insertDocument(final Document document, final String collection) {
+        try {
+            System.out.println("Insert new document");
+            MongoCollection<Document> insertCollection = getCollection(collection);
+            insertCollection.insertOne(document);
+        } catch (MongoException e) {
+            e.printStackTrace();
+        }
     }
 
+    @Override
+    public void insertDocuments(final List<Document> documentList, final String collection) {
+        try {
+            System.out.println("Insert a list of documents");
+            MongoCollection<Document> insertCollection = getCollection(collection);
+            insertCollection.insertMany(documentList);
+        } catch (MongoException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void updateDocument(final String fieldName, final String fieldValue, final String updateFieldName, final String newValue, final String collection) {
+        try {
+            System.out.println("Update Document equals " + fieldName + " and fieldValue " + fieldValue);
+            MongoCollection<Document> insertCollection = getCollection(collection);
+            UpdateResult updateResult = insertCollection.updateOne(eq(fieldName, fieldValue), combine(set(updateFieldName, newValue)));
+            Logger.log(collection, "Update Status: " + updateResult.wasAcknowledged());
+        } catch (MongoException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void replace(final String fieldName, final String fieldValue, final Document replaceDocument, final String collection) {
+        try {
+            System.out.println("Replace fieldName  " + fieldName + " with Document");
+            MongoCollection<Document> insertCollection = getCollection(collection);
+            UpdateResult updateResult = insertCollection.replaceOne(eq(fieldName, fieldValue), replaceDocument);
+            Logger.log(collection, "Update Status: " + updateResult.wasAcknowledged());
+        } catch (MongoException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deleteDocument(final String fieldName, final String fieldValue, final String collection) {
+        try {
+            System.out.println("Delete document with the fieldName " + fieldName);
+            MongoCollection<Document> insertCollection = getCollection(collection);
+            DeleteResult deleteResult = insertCollection.deleteOne(eq(fieldName, fieldValue));
+            Logger.log(collection, "Update Status: " + deleteResult.wasAcknowledged());
+        } catch (MongoException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deleteDocument(final String fieldName, final String collection) {
+        try {
+            System.out.println("Delete all documents with the fieldName " + fieldName);
+            MongoCollection<Document> insertCollection = getCollection(collection);
+            DeleteResult deleteResult = insertCollection.deleteMany(eq(fieldName, ""));
+            Logger.log(collection, "Update Status: " + deleteResult.wasAcknowledged());
+        } catch (MongoException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public FindIterable<Document> getDocumentsInCollection(final String collection) {
+        MongoCollection<Document> databaseCollection = getCollection(collection);
+        return databaseCollection.find();
+    }
+
+    @Override
+    public MongoCollection<Document> getCollection(final String collection) {
+        try {
+            return this.mongoDatabase.getCollection(collection);
+        } catch (MongoException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     public MongoClient getClient() {
         return this.client;
     }
