@@ -8,6 +8,9 @@ package eu.mcone.networkmanager.console;
 
 import eu.mcone.networkmanager.NetworkManager;
 import eu.mcone.networkmanager.api.NetworkModule;
+import eu.mcone.networkmanager.core.console.CommandExecutor;
+import eu.mcone.networkmanager.core.console.ConsoleColor;
+import eu.mcone.networkmanager.core.console.Logger;
 
 public class ConsoleCommandExecutor implements CommandExecutor {
 

@@ -15,12 +15,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>host</artifactId>
-    <packaging>jar</packaging>
-
-    <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
-    </properties>
+    <artifactId>core</artifactId>
 
     <build>
         <finalName>${project.parent.name}-${project.name}-${project.version}</finalName>
@@ -46,14 +41,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>eu.mcone.networkmanager.NetworkManager</mainClass>
-                        </transformer>
-                    </transformers>
-                    <shadedArtifactAttached>false</shadedArtifactAttached>
-                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -61,15 +48,10 @@
     <dependencies>
         <dependency>
             <groupId>eu.mcone.networkmanager</groupId>
-            <artifactId>core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>eu.mcone.networkmanager</groupId>
-            <artifactId>host-api</artifactId>
+            <artifactId>core-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
+
 </project>

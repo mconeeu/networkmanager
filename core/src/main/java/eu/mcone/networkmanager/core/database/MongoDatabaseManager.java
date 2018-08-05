@@ -4,14 +4,19 @@
  *
  */
 
-package eu.mcone.networkmanager.database;
+package eu.mcone.networkmanager.core.database;
 
+import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
-import com.mongodb.client.*;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.internal.MongoDatabaseImpl;
+import com.mongodb.client.internal.OperationExecutor;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import eu.mcone.networkmanager.console.Logger;
-import lombok.Getter;
+import eu.mcone.networkmanager.core.api.database.Database;
+import eu.mcone.networkmanager.core.api.database.MongoDBManager;
+import eu.mcone.networkmanager.core.console.Logger;
 import org.bson.Document;
 
 import java.util.List;
@@ -20,64 +25,18 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.set;
 
-public class MongoDBManager implements eu.mcone.networkmanager.api.database.MongoDBManager {
+public class MongoDatabaseManager extends MongoDatabaseImpl implements MongoDBManager {
 
-    @Getter
-    private final String host;
-    @Getter
-    private final int port;
-    @Getter
-    private String username = null;
-    @Getter
-    private String password = null;
-    @Getter
-    private String database = null;
-
-    private MongoClient client;
-    private MongoDatabase mongoDatabase;
-
-    public MongoDBManager(final String host, final int port) {
-        this.host = host;
-        this.port = port;
-    }
-
-    public MongoDBManager(final Database database) {
-        this.host = database.getHost();
-        this.port = database.getPort();
-        this.username = database.getUsername();
-        this.password = database.getPassword();
-        this.database = database.getDatabase();
-    }
-
-    @Override
-    public void connect() {
-        this.client = MongoClients.create("mongodb://" + host + ":" + port + "");
-    }
-
-    @Override
-    public void connectAuthentication() {
-        this.client = MongoClients.create("mongodb://" + username + ":" + password + "@" + host + ":" + port + "/" + database + "");
-        this.mongoDatabase = this.client.getDatabase("mc1system");
-    }
-
-    @Override
-    public void connectAuthentication(final String username, final String password, final String database) {
-        this.client = MongoClients.create("mongodb://" + username + ":" + password + "@" + host + ":" + port + "/" + database + "");
-    }
-
-    @Override
-    public void closeConnection() {
-        this.client.close();
-    }
-
-    @Override
-    public MongoDatabase getMongoDatabase(final String database) {
-        return this.client.getDatabase(database);
-    }
-
-    @Override
-    public MongoDatabase getMongoDatabase() {
-        return this.mongoDatabase;
+    MongoDatabaseManager(MongoClient client, Database database, OperationExecutor operationExecutor) {
+        super(
+                database.getName(),
+                client.getMongoClientOptions().getCodecRegistry(),
+                client.getMongoClientOptions().getReadPreference(),
+                client.getMongoClientOptions().getWriteConcern(),
+                client.getMongoClientOptions().getRetryWrites(),
+                client.getMongoClientOptions().getReadConcern(),
+                operationExecutor
+        );
     }
 
     @Override
@@ -159,15 +118,11 @@ public class MongoDBManager implements eu.mcone.networkmanager.api.database.Mong
     @Override
     public MongoCollection<Document> getCollection(final String collection) {
         try {
-            return this.mongoDatabase.getCollection(collection);
+            return super.getCollection(collection);
         } catch (MongoException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    @Override
-    public MongoClient getClient() {
-        return this.client;
-    }
 }

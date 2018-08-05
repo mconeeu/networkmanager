@@ -4,7 +4,7 @@
  *
  */
 
-package eu.mcone.networkmanager.console;
+package eu.mcone.networkmanager.core.console;
 
 public class ConsoleColor {
 

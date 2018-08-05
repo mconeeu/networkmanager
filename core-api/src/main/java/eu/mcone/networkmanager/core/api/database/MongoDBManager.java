@@ -4,7 +4,7 @@
  *
  */
 
-package eu.mcone.networkmanager.api.database;
+package eu.mcone.networkmanager.core.api.database;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
@@ -14,15 +14,7 @@ import org.bson.Document;
 
 import java.util.List;
 
-public interface MongoDBManager {
-
-    void connect();
-
-    void connectAuthentication();
-
-    void connectAuthentication(final String username, final String password, final String database);
-
-    void closeConnection();
+public interface MongoDBManager extends MongoDatabase {
 
     void insertDocument(final Document document, final String collection);
 
@@ -40,9 +32,4 @@ public interface MongoDBManager {
 
     MongoCollection<Document> getCollection(final String key);
 
-    MongoDatabase getMongoDatabase(final String key);
-
-    MongoDatabase getMongoDatabase();
-
-    MongoClient getClient();
 }

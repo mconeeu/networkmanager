@@ -15,8 +15,10 @@
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <modules>
-        <module>api</module>
+        <module>host-api</module>
         <module>host</module>
+        <module>core-api</module>
+        <module>core</module>
     </modules>
 
     <properties>

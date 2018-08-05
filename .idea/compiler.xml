@@ -7,12 +7,14 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="api" />
+        <module name="core" />
+        <module name="core-api" />
         <module name="host" />
+        <module name="host-api" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="core" target="1.8" />
+      <module name="api" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

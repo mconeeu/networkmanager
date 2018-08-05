@@ -7,12 +7,13 @@
 package eu.mcone.networkmanager;
 
 import eu.mcone.networkmanager.api.ModuleHost;
-import eu.mcone.networkmanager.console.ConsoleColor;
+import eu.mcone.networkmanager.core.api.database.Database;
+import eu.mcone.networkmanager.core.api.database.MongoDBManager;
+import eu.mcone.networkmanager.core.console.ConsoleColor;
 import eu.mcone.networkmanager.console.ConsoleCommandExecutor;
-import eu.mcone.networkmanager.console.ConsoleReader;
-import eu.mcone.networkmanager.console.Logger;
-import eu.mcone.networkmanager.database.Database;
-import eu.mcone.networkmanager.database.MongoDBManager;
+import eu.mcone.networkmanager.core.console.ConsoleReader;
+import eu.mcone.networkmanager.core.console.Logger;
+import eu.mcone.networkmanager.core.database.MongoConnection;
 import eu.mcone.networkmanager.manager.ModuleManager;
 import lombok.Getter;
 
@@ -33,7 +34,7 @@ public class NetworkManager extends ModuleHost {
     @Getter
     private ExecutorService threadPool;
     @Getter
-    private MongoDBManager mongoDBManager;
+    private MongoConnection mongoConnection;
 
     private NetworkManager() {
         setInstance(this);
@@ -47,15 +48,20 @@ public class NetworkManager extends ModuleHost {
         Logger.log("Enable progress", ConsoleColor.CYAN + "Welcome to mc1-networkmanager. System is starting...");
 
         Logger.log(getClass(), ConsoleColor.GREEN + "Start connection to MongoDatabase...");
-        mongoDBManager = new MongoDBManager(Database.SYSTEM);
-        mongoDBManager.connectAuthentication();
+        mongoConnection = new MongoConnection("db.mcone.eu", "networkmanager", "", "networkmanager", 27017);
+        mongoConnection.connect();
 
         Logger.log(getClass(), ConsoleColor.GREEN + "Start moduleManager...");
-        //moduleManager = new ModuleManager();
+        moduleManager = new ModuleManager();
     }
 
     public static void main(String[] args) {
         new NetworkManager();
+    }
+
+    @Override
+    public MongoDBManager getMongoDatabase(Database database) {
+        return mongoConnection.getDatabase(database);
     }
 
     public void shutdown() {
@@ -66,7 +72,7 @@ public class NetworkManager extends ModuleHost {
         //TODO: Close Netty Server her
 
         Logger.log("Shutdown progress", "Close connection to database...");
-        this.mongoDBManager.closeConnection();
+        mongoConnection.disconnect();
 
         Logger.log("Shutdown progress", "Good bye!");
         System.exit(0);

@@ -29,6 +29,14 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <transformers>
+            <transformer>
+              <mainClass>eu.mcone.networkmanager.NetworkManager</mainClass>
+            </transformer>
+          </transformers>
+          <shadedArtifactAttached>false</shadedArtifactAttached>
+        </configuration>
       </plugin>
     </plugins>
   </build>

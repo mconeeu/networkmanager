@@ -1,3 +1,5 @@
-/.idea
-api/target/
+.idea/
 host/target/
+core-api/target/
+core/target/
+host-api/target/

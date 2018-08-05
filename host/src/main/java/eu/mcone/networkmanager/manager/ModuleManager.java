@@ -8,8 +8,8 @@ package eu.mcone.networkmanager.manager;
 
 import eu.mcone.networkmanager.NetworkManager;
 import eu.mcone.networkmanager.api.NetworkModule;
-import eu.mcone.networkmanager.console.ConsoleColor;
-import eu.mcone.networkmanager.console.Logger;
+import eu.mcone.networkmanager.core.console.ConsoleColor;
+import eu.mcone.networkmanager.core.console.Logger;
 import lombok.Getter;
 
 import java.io.File;
