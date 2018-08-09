@@ -64,6 +64,7 @@ public class NetworkManager extends ModuleHost {
         return mongoConnection.getDatabase(database);
     }
 
+
     public void shutdown() {
         Logger.log("Shutdown progress", "Shutting down Modules...");
         moduleManager.disableModules();

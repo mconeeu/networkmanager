@@ -10,22 +10,22 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.internal.MongoDatabaseImpl;
 import com.mongodb.client.internal.OperationExecutor;
-import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
 import eu.mcone.networkmanager.core.api.database.Database;
 import eu.mcone.networkmanager.core.api.database.MongoDBManager;
-import eu.mcone.networkmanager.core.console.Logger;
 import org.bson.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Updates.combine;
-import static com.mongodb.client.model.Updates.set;
 
 public class MongoDatabaseManager extends MongoDatabaseImpl implements MongoDBManager {
+
+    private String database;
+    private MongoClient mongoClient;
 
     MongoDatabaseManager(MongoClient client, Database database, OperationExecutor operationExecutor) {
         super(
@@ -37,76 +37,37 @@ public class MongoDatabaseManager extends MongoDatabaseImpl implements MongoDBMa
                 client.getMongoClientOptions().getReadConcern(),
                 operationExecutor
         );
+
+        this.database = database.getName();
+        this.mongoClient = client;
     }
 
     @Override
-    public void insertDocument(final Document document, final String collection) {
+    public Boolean containsValue(final Object objectValue, final String collection) {
         try {
-            System.out.println("Insert new document");
-            MongoCollection<Document> insertCollection = getCollection(collection);
-            insertCollection.insertOne(document);
+            MongoCollection<Document> databaseCollection = getCollection(collection);
+            for (Document document : databaseCollection.find()) {
+                return document.containsValue(objectValue);
+            }
         } catch (MongoException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-    @Override
-    public void insertDocuments(final List<Document> documentList, final String collection) {
+    public List<Object> getObject(final String key, final Object objectValue, final String object, final String collection) {
         try {
-            System.out.println("Insert a list of documents");
-            MongoCollection<Document> insertCollection = getCollection(collection);
-            insertCollection.insertMany(documentList);
-        } catch (MongoException e) {
-            e.printStackTrace();
-        }
-    }
+            List<Object> result = new ArrayList<>();
 
-    @Override
-    public void updateDocument(final String fieldName, final String fieldValue, final String updateFieldName, final String newValue, final String collection) {
-        try {
-            System.out.println("Update Document equals " + fieldName + " and fieldValue " + fieldValue);
-            MongoCollection<Document> insertCollection = getCollection(collection);
-            UpdateResult updateResult = insertCollection.updateOne(eq(fieldName, fieldValue), combine(set(updateFieldName, newValue)));
-            Logger.log(collection, "Update Status: " + updateResult.wasAcknowledged());
-        } catch (MongoException e) {
-            e.printStackTrace();
-        }
-    }
+            for (Document documents : getCollection(collection).find(eq(key, objectValue))) {
+                result.add(documents.get(object));
+            }
 
-    @Override
-    public void replace(final String fieldName, final String fieldValue, final Document replaceDocument, final String collection) {
-        try {
-            System.out.println("Replace fieldName  " + fieldName + " with Document");
-            MongoCollection<Document> insertCollection = getCollection(collection);
-            UpdateResult updateResult = insertCollection.replaceOne(eq(fieldName, fieldValue), replaceDocument);
-            Logger.log(collection, "Update Status: " + updateResult.wasAcknowledged());
+            return result;
         } catch (MongoException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void deleteDocument(final String fieldName, final String fieldValue, final String collection) {
-        try {
-            System.out.println("Delete document with the fieldName " + fieldName);
-            MongoCollection<Document> insertCollection = getCollection(collection);
-            DeleteResult deleteResult = insertCollection.deleteOne(eq(fieldName, fieldValue));
-            Logger.log(collection, "Update Status: " + deleteResult.wasAcknowledged());
-        } catch (MongoException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void deleteDocument(final String fieldName, final String collection) {
-        try {
-            System.out.println("Delete all documents with the fieldName " + fieldName);
-            MongoCollection<Document> insertCollection = getCollection(collection);
-            DeleteResult deleteResult = insertCollection.deleteMany(eq(fieldName, ""));
-            Logger.log(collection, "Update Status: " + deleteResult.wasAcknowledged());
-        } catch (MongoException e) {
-            e.printStackTrace();
-        }
+        return null;
     }
 
     @Override
@@ -125,4 +86,18 @@ public class MongoDatabaseManager extends MongoDatabaseImpl implements MongoDBMa
         return null;
     }
 
+    @Override
+    public MongoDatabase getMongoDatabase(String key) {
+        return getClient().getDatabase(key);
+    }
+
+    @Override
+    public MongoDatabase getMongoDatabase() {
+        return getClient().getDatabase(this.database);
+    }
+
+    @Override
+    public MongoClient getClient() {
+        return this.mongoClient;
+    }
 }

@@ -6,9 +6,9 @@
 
 package eu.mcone.networkmanager.api;
 
+import eu.mcone.networkmanager.api.manager.ModuleManager;
 import eu.mcone.networkmanager.core.api.database.Database;
 import eu.mcone.networkmanager.core.api.database.MongoDBManager;
-import eu.mcone.networkmanager.api.manager.ModuleManager;
 import lombok.Getter;
 
 import java.util.concurrent.ExecutorService;
