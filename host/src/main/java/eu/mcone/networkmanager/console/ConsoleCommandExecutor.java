@@ -8,17 +8,18 @@ package eu.mcone.networkmanager.console;
 
 import eu.mcone.networkmanager.NetworkManager;
 import eu.mcone.networkmanager.api.NetworkModule;
-import eu.mcone.networkmanager.core.console.CommandExecutor;
-import eu.mcone.networkmanager.core.console.ConsoleColor;
-import eu.mcone.networkmanager.core.console.Logger;
+import eu.mcone.networkmanager.core.api.console.CommandExecutor;
+import eu.mcone.networkmanager.core.api.console.ConsoleColor;
+import lombok.extern.java.Log;
 
+@Log
 public class ConsoleCommandExecutor implements CommandExecutor {
 
     @Override
     public void onCommand(String cmd, String[] args) {
         if (args.length == 0) {
             if (cmd.equalsIgnoreCase("help")) {
-                Logger.log(getClass(), "---------- [Help] ----------\n" +
+                log.info("---------- [Help] ----------\n" +
                         "help > show this list\n" +
                         "info > returns some information about the networkmanager\n" +
                         "list modules > lists all registered modules\n" +
@@ -29,7 +30,7 @@ public class ConsoleCommandExecutor implements CommandExecutor {
                         "stop all > Stops all working modules\n" +
                         "shutdown > Stops all working modules and the Networkmanager");
             } else if (cmd.equalsIgnoreCase("info")) {
-                Logger.log(getClass(), "---------- [Info] ----------\n" +
+                log.info("---------- [Info] ----------\n" +
                         "Networkmanager info:\n" +
                         "loaded modules: " + NetworkManager.getInstance().getModuleManager().getModules().size());
             } else if (cmd.equalsIgnoreCase("reload")) {
@@ -38,9 +39,9 @@ public class ConsoleCommandExecutor implements CommandExecutor {
         } else if (args.length == 1) {
             if (cmd.equalsIgnoreCase("list")) {
                 if (args[0].equalsIgnoreCase("modules")) {
-                    Logger.log(getClass(), "---------- [Module List] ----------");
+                    log.info("---------- [Module List] ----------");
                     for (NetworkModule networkModule : NetworkManager.getInstance().getModuleManager().getModules()) {
-                        Logger.log(getClass(), "Module: " + networkModule.getInfo().getModuleName() + " " + isRunning(networkModule.getInfo().isRunning()));
+                        log.info("Module: " + networkModule.getInfo().getModuleName() + " " + isRunning(networkModule.getInfo().isRunning()));
                     }
                 }
             } else if (cmd.equalsIgnoreCase("start")) {
@@ -50,14 +51,14 @@ public class ConsoleCommandExecutor implements CommandExecutor {
                     NetworkManager.getManager().getModuleManager().disableModules();
                 } else if (NetworkManager.getInstance().getModuleManager().getModule(args[0]) != null) {
                     NetworkManager.getInstance().getModuleManager().disableModule(NetworkManager.getManager().getModuleManager().getModule(args[0]));
-                    Logger.log(getClass(), ConsoleColor.RED + "Please use /help");
+                    log.info(ConsoleColor.RED + "Please use /help");
                 }
             } else if (cmd.equalsIgnoreCase("reload")){
                 NetworkManager.getInstance().getModuleManager().reloadModule(NetworkManager.getManager().getModuleManager().getModule(args[0]));
             } else if (cmd.equalsIgnoreCase("shutdown")) {
                 NetworkManager.getInstance().shutdown();
             } else {
-                Logger.log(getClass(), ConsoleColor.RED + "Please use /help");
+                log.info(ConsoleColor.RED + "Please use /help");
             }
         }
     }

@@ -8,9 +8,9 @@ package eu.mcone.networkmanager.manager;
 
 import eu.mcone.networkmanager.NetworkManager;
 import eu.mcone.networkmanager.api.NetworkModule;
-import eu.mcone.networkmanager.core.console.ConsoleColor;
-import eu.mcone.networkmanager.core.console.Logger;
+import eu.mcone.networkmanager.core.api.console.ConsoleColor;
 import lombok.Getter;
+import lombok.extern.java.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,10 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+@Log
 public class ModuleManager implements eu.mcone.networkmanager.api.manager.ModuleManager {
+
+    private final static File MODULE_DIR = new File(NetworkManager.HOME_DIR, "modules");
 
     @Getter
     private List<NetworkModule> modules;
@@ -33,7 +36,11 @@ public class ModuleManager implements eu.mcone.networkmanager.api.manager.Module
     }
 
     private void loadModules() {
-        File[] modules = NetworkManager.HOME_DIR.listFiles();
+        if (!MODULE_DIR.exists()) {
+            MODULE_DIR.mkdir();
+        }
+
+        File[] modules = MODULE_DIR.listFiles();
 
         if (modules != null) {
             for (File module : modules) {
@@ -47,7 +54,7 @@ public class ModuleManager implements eu.mcone.networkmanager.api.manager.Module
     @Override
     public void loadModule(final File module) {
         try {
-            Logger.log("ModuleManager", ConsoleColor.GREEN + "Loaded module " + module.getName());
+            log.info("ModuleManager - " + ConsoleColor.GREEN + "Loaded module " + module.getName());
             JarFile jarFile = new JarFile(module);
             Enumeration<JarEntry> e = jarFile.entries();
 
@@ -86,28 +93,28 @@ public class ModuleManager implements eu.mcone.networkmanager.api.manager.Module
 
     @Override
     public void enableModule(final NetworkModule module) {
-        Logger.log("ModuleManager", ConsoleColor.GREEN + "Enabled module " + module.getInfo().getModuleName());
+        log.info("ModuleManager - " + ConsoleColor.GREEN + "Enabled module " + module.getInfo().getModuleName());
         module.getInfo().setRunning(true);
         module.onEnable();
     }
 
     @Override
     public void disableModule(final NetworkModule module) {
-        Logger.log("ModuleManager", ConsoleColor.GREEN + "Stop module " + module.getInfo().getModuleName() + "...");
+        log.info("ModuleManager - " + ConsoleColor.GREEN + "Stop module " + module.getInfo().getModuleName() + "...");
         if (modules.contains(module)) {
             if (module.getInfo().isRunning()) {
                 module.onDisable();
                 module.getInfo().setRunning(false);
             } else {
-                Logger.log("ModuleManager", ConsoleColor.RED + "The module with the module name " + module.getInfo().getModuleName() + " has already been stopped");
+                log.warning("ModuleManager - " + ConsoleColor.YELLOW + "The module with the module name " + module.getInfo().getModuleName() + " has already been stopped");
             }
         } else {
-            Logger.log("ModuleManager", ConsoleColor.RED + "There is no module with the module name" + module.getInfo().getModuleName());
+            log.warning("ModuleManager - " + ConsoleColor.YELLOW + "There is no module with the module name" + module.getInfo().getModuleName());
         }
     }
 
     public void reloadModule(final NetworkModule module) {
-        Logger.log(getClass(), ConsoleColor.GREEN + "Reload module " + module.getInfo().getModuleName());
+        log.info("ModuleManager - " + ConsoleColor.GREEN + "Reload module " + module.getInfo().getModuleName());
         if (module.getInfo().isRunning()) {
             module.onDisable();
         }
@@ -121,7 +128,7 @@ public class ModuleManager implements eu.mcone.networkmanager.api.manager.Module
     }
 
     public void disableModules() {
-        Logger.log("ModuleManager", "Stop all working modules...");
+        log.info("ModuleManager - Stop all working modules...");
         for (NetworkModule module : this.modules) {
             disableModule(module);
         }

@@ -10,6 +10,7 @@ package eu.mcone.networkmanager.core.database;
 import com.mongodb.*;
 import com.mongodb.client.internal.OperationExecutor;
 import eu.mcone.networkmanager.core.api.database.Database;
+import eu.mcone.networkmanager.core.api.database.MongoDatabase;
 import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -56,7 +57,7 @@ public class MongoConnection {
         }
     }
 
-    public MongoDatabaseManager getDatabase(Database database) {
+    public MongoDatabase getDatabase(Database database) {
         if (client != null) {
             try {
                 Method m = Mongo.class.getDeclaredMethod("createOperationExecutor");
@@ -64,7 +65,7 @@ public class MongoConnection {
                 OperationExecutor executor = (OperationExecutor) m.invoke(client);
                 m.setAccessible(false);
 
-                return new MongoDatabaseManager(client, database, executor);
+                return new MongoDatabaseImpl(client, database, executor);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 e.printStackTrace();
                 return null;

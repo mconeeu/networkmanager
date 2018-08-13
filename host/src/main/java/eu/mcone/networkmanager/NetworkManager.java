@@ -7,26 +7,30 @@
 package eu.mcone.networkmanager;
 
 import eu.mcone.networkmanager.api.ModuleHost;
-import eu.mcone.networkmanager.core.api.database.Database;
-import eu.mcone.networkmanager.core.api.database.MongoDBManager;
-import eu.mcone.networkmanager.core.console.ConsoleColor;
 import eu.mcone.networkmanager.console.ConsoleCommandExecutor;
+import eu.mcone.networkmanager.core.api.console.ConsoleColor;
+import eu.mcone.networkmanager.core.api.database.Database;
+import eu.mcone.networkmanager.core.api.database.MongoDatabase;
 import eu.mcone.networkmanager.core.console.ConsoleReader;
-import eu.mcone.networkmanager.core.console.Logger;
+import eu.mcone.networkmanager.core.console.log.MconeLogger;
 import eu.mcone.networkmanager.core.database.MongoConnection;
 import eu.mcone.networkmanager.manager.ModuleManager;
 import lombok.Getter;
+import lombok.extern.java.Log;
 
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Log
 public class NetworkManager extends ModuleHost {
 
     @Getter
     private static NetworkManager manager;
     public static final File HOME_DIR = new File(System.getProperty("user.dir"));
 
+    @Getter
+    private MconeLogger mconeLogger;
     @Getter
     private ModuleManager moduleManager;
     @Getter
@@ -40,19 +44,21 @@ public class NetworkManager extends ModuleHost {
         setInstance(this);
         manager = this;
 
+        mconeLogger = new MconeLogger();
         threadPool = Executors.newCachedThreadPool();
-
         consoleReader = new ConsoleReader();
         consoleReader.registerCommand(new ConsoleCommandExecutor());
 
-        Logger.log("Enable progress", ConsoleColor.CYAN + "Welcome to mc1-networkmanager. System is starting...");
+        log.info("Enable progress - " + ConsoleColor.AQUA + "Welcome to mc1-networkmanager. System is starting...");
 
-        Logger.log(getClass(), ConsoleColor.GREEN + "Start connection to MongoDatabase...");
+        log.info("Enable progress - " + ConsoleColor.GREEN + "Start connection to MongoDatabase...");
         mongoConnection = new MongoConnection("db.mcone.eu", "networkmanager", "", "networkmanager", 27017);
         mongoConnection.connect();
 
-        Logger.log(getClass(), ConsoleColor.GREEN + "Start moduleManager...");
+        log.info("Enable progress - " + ConsoleColor.GREEN + "Start moduleManager...");
         moduleManager = new ModuleManager();
+
+        log.finest(ConsoleColor.GREEN + "READY!");
     }
 
     public static void main(String[] args) {
@@ -60,22 +66,22 @@ public class NetworkManager extends ModuleHost {
     }
 
     @Override
-    public MongoDBManager getMongoDatabase(Database database) {
+    public MongoDatabase getMongoDatabase(Database database) {
         return mongoConnection.getDatabase(database);
     }
 
 
     public void shutdown() {
-        Logger.log("Shutdown progress", "Shutting down Modules...");
+        log.info("Shutdown progress - Shutting down Modules...");
         moduleManager.disableModules();
 
-        Logger.log("Shutdown progress", "Stop Netty server...");
+        log.info("Shutdown progress - Stopping Netty server...");
         //TODO: Close Netty Server her
 
-        Logger.log("Shutdown progress", "Close connection to database...");
+        log.info("Shutdown progress - Closing connection to database...");
         mongoConnection.disconnect();
 
-        Logger.log("Shutdown progress", "Good bye!");
+        log.info("Shutdown progress - Good bye!");
         System.exit(0);
     }
 }

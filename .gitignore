@@ -3,3 +3,6 @@ host/target/
 core-api/target/
 core/target/
 host-api/target/
+core-api/dependency-reduced-pom.xml
+core-api/src/test/
+core/dependency-reduced-pom.xml

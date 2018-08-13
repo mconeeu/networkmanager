@@ -7,8 +7,9 @@
 package eu.mcone.networkmanager.api;
 
 import eu.mcone.networkmanager.api.manager.ModuleManager;
+import eu.mcone.networkmanager.core.api.console.ConsoleReader;
 import eu.mcone.networkmanager.core.api.database.Database;
-import eu.mcone.networkmanager.core.api.database.MongoDBManager;
+import eu.mcone.networkmanager.core.api.database.MongoDatabase;
 import lombok.Getter;
 
 import java.util.concurrent.ExecutorService;
@@ -28,9 +29,11 @@ public abstract class ModuleHost {
 
     public abstract ExecutorService getThreadPool();
 
+    public abstract ConsoleReader getConsoleReader();
+
     public abstract ModuleManager getModuleManager();
 
-    public abstract MongoDBManager getMongoDatabase(Database database);
+    public abstract MongoDatabase getMongoDatabase(Database database);
 
     public abstract void shutdown();
 }
