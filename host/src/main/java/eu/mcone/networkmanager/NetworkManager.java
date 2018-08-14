@@ -15,6 +15,7 @@ import eu.mcone.networkmanager.core.console.ConsoleReader;
 import eu.mcone.networkmanager.core.console.log.MconeLogger;
 import eu.mcone.networkmanager.core.database.MongoConnection;
 import eu.mcone.networkmanager.manager.ModuleManager;
+import eu.mcone.networkmanager.network.ServerBootstrap;
 import lombok.Getter;
 import lombok.extern.java.Log;
 
@@ -31,6 +32,8 @@ public class NetworkManager extends ModuleHost {
 
     @Getter
     private MconeLogger mconeLogger;
+    @Getter
+    private ServerBootstrap serverBootstrap;
     @Getter
     private ModuleManager moduleManager;
     @Getter
@@ -55,6 +58,9 @@ public class NetworkManager extends ModuleHost {
         mongoConnection = new MongoConnection("db.mcone.eu", "networkmanager", "", "networkmanager", 27017);
         mongoConnection.connect();
 
+        log.info("Enable progress - " + ConsoleColor.GREEN + "Start server bootstrap...");
+        serverBootstrap = new ServerBootstrap(40000);
+
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start moduleManager...");
         moduleManager = new ModuleManager();
 
@@ -74,9 +80,6 @@ public class NetworkManager extends ModuleHost {
     public void shutdown() {
         log.info("Shutdown progress - Shutting down Modules...");
         moduleManager.disableModules();
-
-        log.info("Shutdown progress - Stopping Netty server...");
-        //TODO: Close Netty Server her
 
         log.info("Shutdown progress - Closing connection to database...");
         mongoConnection.disconnect();

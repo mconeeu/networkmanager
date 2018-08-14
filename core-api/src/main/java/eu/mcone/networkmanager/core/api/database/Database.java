@@ -13,7 +13,8 @@ public enum Database {
     SYSTEM(0, "mc1system"),
     STATS(1, "mc1stats"),
     DATA(2, "mc1data"),
-    CLOUD(3, "mc1cloud");
+    NETWORK(3, "mc1network"),
+    CLOUD(4, "mc1cloud");
 
     @Getter
     private int id;
