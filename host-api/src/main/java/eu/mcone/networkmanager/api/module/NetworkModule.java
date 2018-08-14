@@ -4,21 +4,11 @@
  *
  */
 
-package eu.mcone.networkmanager.api;
-
-import eu.mcone.networkmanager.api.module.ModuleInfo;
-import lombok.Getter;
+package eu.mcone.networkmanager.api.module;
 
 public abstract class NetworkModule {
 
-    @Getter
-    private ModuleInfo info;
-
     public NetworkModule() {}
-
-    public NetworkModule(ModuleInfo info) {
-        this.info = info;
-    }
 
     public abstract void onEnable();
 
