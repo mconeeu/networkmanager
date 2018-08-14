@@ -15,7 +15,8 @@ import eu.mcone.networkmanager.core.api.database.MongoDatabase;
 import eu.mcone.networkmanager.core.console.ConsoleReader;
 import eu.mcone.networkmanager.core.console.log.MconeLogger;
 import eu.mcone.networkmanager.core.database.MongoConnection;
-import eu.mcone.networkmanager.manager.ModuleManager;
+import eu.mcone.networkmanager.module.ModuleManager;
+import eu.mcone.networkmanager.network.ServerBootstrap;
 import lombok.Getter;
 import lombok.extern.java.Log;
 
