@@ -6,6 +6,7 @@
 
 package eu.mcone.networkmanager;
 
+import com.google.gson.Gson;
 import eu.mcone.networkmanager.api.ModuleHost;
 import eu.mcone.networkmanager.console.ConsoleCommandExecutor;
 import eu.mcone.networkmanager.core.api.console.ConsoleColor;
@@ -15,7 +16,6 @@ import eu.mcone.networkmanager.core.console.ConsoleReader;
 import eu.mcone.networkmanager.core.console.log.MconeLogger;
 import eu.mcone.networkmanager.core.database.MongoConnection;
 import eu.mcone.networkmanager.manager.ModuleManager;
-import eu.mcone.networkmanager.network.ServerBootstrap;
 import lombok.Getter;
 import lombok.extern.java.Log;
 
@@ -30,6 +30,8 @@ public class NetworkManager extends ModuleHost {
     private static NetworkManager manager;
     public static final File HOME_DIR = new File(System.getProperty("user.dir"));
 
+    @Getter
+    private Gson gson;
     @Getter
     private MconeLogger mconeLogger;
     @Getter
@@ -47,6 +49,7 @@ public class NetworkManager extends ModuleHost {
         setInstance(this);
         manager = this;
 
+        gson = new Gson();
         mconeLogger = new MconeLogger();
         threadPool = Executors.newCachedThreadPool();
         consoleReader = new ConsoleReader();
@@ -55,7 +58,7 @@ public class NetworkManager extends ModuleHost {
         log.info("Enable progress - " + ConsoleColor.AQUA + "Welcome to mc1-networkmanager. System is starting...");
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start connection to MongoDatabase...");
-        mongoConnection = new MongoConnection("db.mcone.eu", "networkmanager", "", "networkmanager", 27017);
+        mongoConnection = new MongoConnection("db.mcone.eu", "admin", "T6KIq8gjmmF1k7futx0cJiJinQXgfguYXruds1dFx1LF5IsVPQjuDTnlI1zltpD9", "admin", 27017);
         mongoConnection.connect();
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start server bootstrap...");

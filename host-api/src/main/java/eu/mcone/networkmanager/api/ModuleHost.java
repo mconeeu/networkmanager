@@ -6,6 +6,7 @@
 
 package eu.mcone.networkmanager.api;
 
+import com.google.gson.Gson;
 import eu.mcone.networkmanager.api.manager.ModuleManager;
 import eu.mcone.networkmanager.core.api.console.ConsoleReader;
 import eu.mcone.networkmanager.core.api.database.Database;
@@ -34,6 +35,8 @@ public abstract class ModuleHost {
     public abstract ModuleManager getModuleManager();
 
     public abstract MongoDatabase getMongoDatabase(Database database);
+
+    public abstract Gson getGson();
 
     public abstract void shutdown();
 }

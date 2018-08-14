@@ -7,7 +7,7 @@
 package eu.mcone.networkmanager.console;
 
 import eu.mcone.networkmanager.NetworkManager;
-import eu.mcone.networkmanager.api.NetworkModule;
+import eu.mcone.networkmanager.api.module.ModuleInfo;
 import eu.mcone.networkmanager.core.api.console.CommandExecutor;
 import eu.mcone.networkmanager.core.api.console.ConsoleColor;
 import lombok.extern.java.Log;
@@ -32,29 +32,29 @@ public class ConsoleCommandExecutor implements CommandExecutor {
             } else if (cmd.equalsIgnoreCase("info")) {
                 log.info("---------- [Info] ----------\n" +
                         "Networkmanager info:\n" +
-                        "loaded modules: " + NetworkManager.getInstance().getModuleManager().getModules().size());
+                        "loaded modules: " + NetworkManager.getManager().getModuleManager().getModules().size());
             } else if (cmd.equalsIgnoreCase("reload")) {
-                NetworkManager.getManager().getModuleManager().reloadModules();
+                NetworkManager.getManager().getModuleManager().reload();
             }
         } else if (args.length == 1) {
             if (cmd.equalsIgnoreCase("list")) {
                 if (args[0].equalsIgnoreCase("modules")) {
                     log.info("---------- [Module List] ----------");
-                    for (NetworkModule networkModule : NetworkManager.getInstance().getModuleManager().getModules()) {
-                        log.info("Module: " + networkModule.getInfo().getModuleName() + " " + isRunning(networkModule.getInfo().isRunning()));
+                    for (ModuleInfo module : NetworkManager.getManager().getModuleManager().getModules()) {
+                        log.info("Module: " + module.getName() + " " + isRunning(module.isRunning()));
                     }
                 }
             } else if (cmd.equalsIgnoreCase("start")) {
-                NetworkManager.getInstance().getModuleManager().enableModule(NetworkManager.getInstance().getModuleManager().getModule(args[0]));
+                NetworkManager.getInstance().getModuleManager().enableModule(NetworkManager.getInstance().getModuleManager().getModuleInfo(args[0]));
             } else if (cmd.equalsIgnoreCase("stop")) {
                 if (args[0].equalsIgnoreCase("all")) {
                     NetworkManager.getManager().getModuleManager().disableModules();
                 } else if (NetworkManager.getInstance().getModuleManager().getModule(args[0]) != null) {
-                    NetworkManager.getInstance().getModuleManager().disableModule(NetworkManager.getManager().getModuleManager().getModule(args[0]));
+                    NetworkManager.getInstance().getModuleManager().disableModule(NetworkManager.getManager().getModuleManager().getModuleInfo(args[0]));
                     log.info(ConsoleColor.RED + "Please use /help");
                 }
             } else if (cmd.equalsIgnoreCase("reload")){
-                NetworkManager.getInstance().getModuleManager().reloadModule(NetworkManager.getManager().getModuleManager().getModule(args[0]));
+                NetworkManager.getInstance().getModuleManager().reloadModule(NetworkManager.getManager().getModuleManager().getModuleInfo(args[0]));
             } else if (cmd.equalsIgnoreCase("shutdown")) {
                 NetworkManager.getInstance().shutdown();
             } else {

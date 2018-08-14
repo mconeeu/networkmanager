@@ -6,27 +6,17 @@
 
 package eu.mcone.networkmanager.api.module;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.io.File;
 
+@Data
+@AllArgsConstructor
 public class ModuleInfo {
 
-    @Getter @Setter
-    private String moduleClass;
-    @Getter @Setter
-    private String moduleName;
-    @Getter @Setter
-    private boolean running;
-    @Getter @Setter
+    private String name, author, main, description;
     private File file;
-
-    public ModuleInfo(final String moduleClass, final String moduleName, final boolean running, final File file) {
-        this.moduleClass = moduleClass;
-        this.moduleName = moduleName;
-        this.running = running;
-        this.file = file;
-    }
+    private boolean running;
 
 }

@@ -6,7 +6,6 @@
 
 package eu.mcone.networkmanager.core.api.database;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
@@ -18,7 +17,5 @@ public interface MongoDatabase extends com.mongodb.client.MongoDatabase {
     FindIterable<Document> getDocumentsInCollection(final String collection);
 
     MongoCollection<Document> getCollection(final String key);
-
-    MongoClient getClient();
 
 }

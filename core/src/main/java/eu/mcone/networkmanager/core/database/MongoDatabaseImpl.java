@@ -19,7 +19,6 @@ public class MongoDatabaseImpl extends com.mongodb.client.internal.MongoDatabase
 
     @Getter
     private Database database;
-    private MongoClient mongoClient;
 
     MongoDatabaseImpl(MongoClient client, Database database, OperationExecutor operationExecutor) {
         super(
@@ -33,7 +32,6 @@ public class MongoDatabaseImpl extends com.mongodb.client.internal.MongoDatabase
         );
 
         this.database = database;
-        this.mongoClient = client;
     }
 
     @Override
@@ -52,8 +50,4 @@ public class MongoDatabaseImpl extends com.mongodb.client.internal.MongoDatabase
         return null;
     }
 
-    @Override
-    public MongoClient getClient() {
-        return this.mongoClient;
-    }
 }
