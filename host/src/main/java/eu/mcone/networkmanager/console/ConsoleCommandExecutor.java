@@ -45,7 +45,7 @@ public class ConsoleCommandExecutor implements CommandExecutor {
                     }
                 }
             } else if (cmd.equalsIgnoreCase("start")) {
-                NetworkManager.getInstance().getModuleManager().enableModule(NetworkManager.getInstance().getModuleManager().getModuleInfo(args[0]));
+                NetworkManager.getInstance().getModuleManager().loadModule(NetworkManager.getInstance().getModuleManager().getModuleInfo(args[0]));
             } else if (cmd.equalsIgnoreCase("stop")) {
                 if (args[0].equalsIgnoreCase("all")) {
                     NetworkManager.getManager().getModuleManager().disableModules();

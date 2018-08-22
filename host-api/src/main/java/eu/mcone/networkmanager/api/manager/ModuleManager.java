@@ -15,6 +15,12 @@ public interface ModuleManager {
 
     void close();
 
+    void loadModules();
+
+    void loadModule(ModuleInfo info);
+
+    void enableModules();
+
     void enableModule(ModuleInfo info);
 
     void disableModule(ModuleInfo info);

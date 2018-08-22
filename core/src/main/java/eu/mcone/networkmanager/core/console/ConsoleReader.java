@@ -7,7 +7,6 @@
 package eu.mcone.networkmanager.core.console;
 
 import eu.mcone.networkmanager.core.api.console.CommandExecutor;
-import org.jline.reader.LineReader;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,11 +16,9 @@ import java.util.Scanner;
 public class ConsoleReader implements eu.mcone.networkmanager.core.api.console.ConsoleReader {
 
     private Map<String, CommandExecutor> executors;
-    private LineReader reader;
 
     public ConsoleReader() {
         executors = new HashMap<>();
-        //reader = LineReaderBuilder.builder().build();
 
         new Thread(() -> {
             Scanner sc = new Scanner(System.in);

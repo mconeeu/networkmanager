@@ -6,9 +6,12 @@
 
 package eu.mcone.networkmanager.api.module;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public abstract class NetworkModule {
 
-    public NetworkModule() {}
+    public abstract void onLoad();
 
     public abstract void onEnable();
 

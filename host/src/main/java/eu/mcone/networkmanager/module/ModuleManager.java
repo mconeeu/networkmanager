@@ -35,7 +35,6 @@ public class ModuleManager implements eu.mcone.networkmanager.api.manager.Module
     public ModuleManager() {
         modules = new HashMap<>();
         detectModules();
-        enableModules();
     }
 
     @Override
@@ -45,7 +44,7 @@ public class ModuleManager implements eu.mcone.networkmanager.api.manager.Module
 
         for (HashMap.Entry<ModuleInfo, NetworkModule> entry : modules.entrySet()) {
             if (entry.getValue() == null) {
-                enableModule(entry.getKey());
+                loadModule(entry.getKey());
             }
         }
     }
@@ -102,20 +101,21 @@ public class ModuleManager implements eu.mcone.networkmanager.api.manager.Module
         }
     }
 
-    private void enableModules() {
-        log.info("Enabling all non-running Modules...");
+    @Override
+    public void loadModules() {
+        log.info("Loading all non-running Modules...");
         for (ModuleInfo info : modules.keySet()) {
             if (!info.isRunning()) {
-                enableModule(info);
+                loadModule(info);
             } else {
-                log.warning("Cannot enable Module "+info.getName()+". Its already running!");
+                log.warning("Cannot load Module "+info.getName()+". Its already running!");
             }
         }
     }
 
     @Override
-    public void enableModule(final ModuleInfo info) {
-        log.info(ConsoleColor.GREEN + "Enabling module " + info.getName());
+    public void loadModule(final ModuleInfo info) {
+        log.info(ConsoleColor.GREEN + "Loading module " + info.getName());
 
         if (!info.isRunning()) {
             try {
@@ -130,11 +130,32 @@ public class ModuleManager implements eu.mcone.networkmanager.api.manager.Module
                 modules.put(info, module);
 
                 info.setRunning(true);
-                module.onEnable();
+                module.onLoad();
             } catch (MalformedURLException | ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
                 log.severe("Error while loading Module "+info.getName()+":");
                 e.printStackTrace();
             }
+        } else {
+            log.severe("Module is still loaded!");
+        }
+    }
+
+    @Override
+    public void enableModules() {
+        log.info("Enabling all running Modules...");
+        for (ModuleInfo info : modules.keySet()) {
+            if (info.isRunning()) {
+                enableModule(info);
+            } else {
+                log.warning("Cannot load Module "+info.getName()+". Its already running!");
+            }
+        }
+    }
+
+    @Override
+    public void enableModule(ModuleInfo info) {
+        if (!info.isRunning()) {
+            modules.get(info).onEnable();
         } else {
             log.severe("Module is still loaded!");
         }
@@ -165,9 +186,11 @@ public class ModuleManager implements eu.mcone.networkmanager.api.manager.Module
         if (modules.containsKey(info)) {
             if (info.isRunning()) {
                 disableModule(info);
+                loadModule(info);
                 enableModule(info);
             } else {
                 log.warning("The module " + info.getName() + " cannot be reloaded. Its not running! Starting anyways...");
+                loadModule(info);
                 enableModule(info);
             }
         } else {
