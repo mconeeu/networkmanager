@@ -12,11 +12,25 @@ import com.mongodb.client.internal.OperationExecutor;
 import eu.mcone.networkmanager.core.api.database.Database;
 import eu.mcone.networkmanager.core.api.database.MongoDatabase;
 import lombok.Getter;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+
 public class MongoConnection {
+
+    private final static CodecRegistry CODEC_REGISTRY = fromRegistries(
+            MongoClient.getDefaultCodecRegistry(),
+            fromProviders(
+                    PojoCodecProvider.builder()
+                            .automatic(true)
+                            .build()
+            )
+    );
 
     private String host, userName, password, authDatabase;
     private int port;
@@ -37,13 +51,15 @@ public class MongoConnection {
         this.port = port;
     }
 
-    public MongoClient connect() {
+    public MongoConnection connect() {
         if (userName == null) {
-            return client = new MongoClient(
+            client = new MongoClient(
                     host, port
             );
+
+            return this;
         } else {
-            return client = new MongoClient(
+            client = new MongoClient(
                     new ServerAddress(host, port),
                     MongoCredential.createCredential(
                             userName,
@@ -51,9 +67,12 @@ public class MongoConnection {
                             password.toCharArray()
                     ),
                     MongoClientOptions.builder()
+                            .codecRegistry(CODEC_REGISTRY)
                             .sslEnabled(false)
                             .build()
             );
+
+            return this;
         }
     }
 
