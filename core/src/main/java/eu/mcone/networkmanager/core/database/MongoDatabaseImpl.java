@@ -7,13 +7,13 @@
 package eu.mcone.networkmanager.core.database;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.internal.OperationExecutor;
 import eu.mcone.networkmanager.core.api.database.Database;
 import lombok.Getter;
-import org.bson.Document;
+import org.bson.codecs.configuration.CodecProvider;
+
+import java.util.ArrayList;
 
 public class MongoDatabaseImpl extends com.mongodb.client.internal.MongoDatabaseImpl implements eu.mcone.networkmanager.core.api.database.MongoDatabase {
 
@@ -35,19 +35,8 @@ public class MongoDatabaseImpl extends com.mongodb.client.internal.MongoDatabase
     }
 
     @Override
-    public FindIterable<Document> getDocumentsInCollection(final String collection) {
-        MongoCollection<Document> databaseCollection = getCollection(collection);
-        return databaseCollection.find();
-    }
-
-    @Override
-    public MongoCollection<Document> getCollection(final String collection) {
-        try {
-            return super.getCollection(collection);
-        } catch (MongoException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public MongoCollection getCollectionWithAdditionalCodecProviders(String name, CodecProvider... providers) {
+        return MongoConnection.addCodecProviders(getCollection(name), providers);
     }
 
 }

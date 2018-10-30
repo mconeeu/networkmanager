@@ -6,16 +6,13 @@
 
 package eu.mcone.networkmanager.core.api.database;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import org.bson.Document;
+import org.bson.codecs.configuration.CodecProvider;
 
 public interface MongoDatabase extends com.mongodb.client.MongoDatabase {
 
     Database getDatabase();
 
-    FindIterable<Document> getDocumentsInCollection(final String collection);
-
-    MongoCollection<Document> getCollection(final String key);
+    MongoCollection getCollectionWithAdditionalCodecProviders(String name, CodecProvider... provider);
 
 }

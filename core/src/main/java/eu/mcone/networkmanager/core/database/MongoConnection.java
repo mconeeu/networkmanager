@@ -8,10 +8,14 @@ package eu.mcone.networkmanager.core.database;
 
 
 import com.mongodb.*;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.internal.OperationExecutor;
 import eu.mcone.networkmanager.core.api.database.Database;
 import eu.mcone.networkmanager.core.api.database.MongoDatabase;
 import lombok.Getter;
+import org.bson.UuidRepresentation;
+import org.bson.codecs.UuidCodecProvider;
+import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
@@ -28,7 +32,8 @@ public class MongoConnection {
             fromProviders(
                     PojoCodecProvider.builder()
                             .automatic(true)
-                            .build()
+                            .build(),
+                    new UuidCodecProvider(UuidRepresentation.JAVA_LEGACY)
             )
     );
 
@@ -96,6 +101,10 @@ public class MongoConnection {
 
     public void disconnect() {
         client.close();
+    }
+
+    public static MongoCollection addCodecProviders(MongoCollection collection, CodecProvider... providers) {
+        return collection.withCodecRegistry(fromRegistries(CODEC_REGISTRY, fromProviders(providers)));
     }
 
 }
