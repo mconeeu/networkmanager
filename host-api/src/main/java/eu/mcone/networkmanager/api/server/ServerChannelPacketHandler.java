@@ -4,8 +4,10 @@
  *
  */
 
-package eu.mcone.networkmanager.api.network.server;
+package eu.mcone.networkmanager.api.server;
 
+import eu.mcone.networkmanager.api.module.NetworkModule;
+import eu.mcone.networkmanager.api.network.client.handler.PacketHandler;
 import eu.mcone.networkmanager.api.network.client.handler.WebRequestHandler;
 import eu.mcone.networkmanager.api.network.packet.Packet;
 import io.netty.channel.Channel;
@@ -15,7 +17,11 @@ import java.util.UUID;
 
 public interface ServerChannelPacketHandler {
 
-    void registerPacket(Class<? extends Packet> clazz);
+    <T extends Packet> void registerPacket(NetworkModule module, Class<T> clazz, PacketHandler<T> handler);
+
+    <T extends Packet> void registerPacket(NetworkModule module, Class<T> clazz);
+
+    <T extends Packet> void registerAdditionalPacketHandler(Class<T> clazz, PacketHandler<T> handler) throws IllegalStateException;
 
     void registerWebRequestHandler(String name, WebRequestHandler handler);
 

@@ -13,7 +13,7 @@
     <groupId>eu.mcone.networkmanager</groupId>
     <artifactId>mcone-networkmanager</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.1-SNAPSHOT</version>
     <modules>
         <module>host-api</module>
         <module>host</module>
@@ -60,6 +60,20 @@
         <name>MC ONE</name>
         <url>https://www.mcone.eu</url>
     </organization>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <show>public</show>
+                    <additionalJOption>-Xdoclint:none</additionalJOption>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <distributionManagement>
         <repository>

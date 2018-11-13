@@ -8,6 +8,7 @@ package eu.mcone.networkmanager.network;
 
 import com.google.gson.JsonObject;
 import eu.mcone.networkmanager.NetworkManager;
+import eu.mcone.networkmanager.api.module.NetworkModule;
 import eu.mcone.networkmanager.api.network.client.handler.PacketHandler;
 import eu.mcone.networkmanager.api.network.client.handler.WebRequestGetHandler;
 import eu.mcone.networkmanager.api.network.client.handler.WebRequestHandler;
@@ -16,7 +17,7 @@ import eu.mcone.networkmanager.api.network.packet.ClientRegisterPacketHost;
 import eu.mcone.networkmanager.api.network.packet.Packet;
 import eu.mcone.networkmanager.api.network.packet.PacketRegisterPacketClient;
 import eu.mcone.networkmanager.api.network.packet.PacketResolver;
-import eu.mcone.networkmanager.api.network.server.ServerChannelPacketHandler;
+import eu.mcone.networkmanager.api.server.ServerChannelPacketHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -28,18 +29,19 @@ import java.util.*;
 public class ChannelPacketHandler extends SimpleChannelInboundHandler<Packet> implements ServerChannelPacketHandler, PacketResolver {
 
     private Map<UUID, Channel> channels;
+    private Map<NetworkModule, Set<Class<? extends Packet>>> modules;
     private Map<Class<? extends Packet>, Integer> packetIds;
+    private Map<Class<? extends Packet>, Set<PacketHandler<? extends Packet>>> handlers;
     private Map<String, WebRequestHandler> webHandler;
 
     public ChannelPacketHandler() {
         channels = new HashMap<>();
+        modules = new HashMap<>();
         packetIds = new HashMap<>();
+        handlers = new HashMap<>();
         webHandler = new HashMap<>();
 
-        packetIds.put(ClientRegisterPacketHost.class, 0);
-        packetIds.put(PacketRegisterPacketClient.class, 1);
-
-        ClientRegisterPacketHost.addHandler((PacketHandler<ClientRegisterPacketHost>) (packet, chc) -> {
+        registerPacket(null, ClientRegisterPacketHost.class, (packet, chc) -> {
             UUID uuid = UUID.randomUUID();
             channels.put(uuid, chc.channel());
 
@@ -47,6 +49,7 @@ public class ChannelPacketHandler extends SimpleChannelInboundHandler<Packet> im
                 chc.writeAndFlush(new PacketRegisterPacketClient(packetIds));
             }
         });
+        registerPacket(null, PacketRegisterPacketClient.class);
     }
 
     public void onWebRequest(String json, ChannelHandlerContext chc) {
@@ -98,9 +101,63 @@ public class ChannelPacketHandler extends SimpleChannelInboundHandler<Packet> im
     }
 
     @Override
-    public void registerPacket(Class<? extends Packet> clazz) {
+    public <T extends Packet> void registerPacket(NetworkModule module, Class<T> clazz, PacketHandler<T> handler) {
+        if (module != null) {
+            boolean contains;
+            if (!(contains = modules.containsKey(module)) || !modules.get(module).contains(clazz)) {
+                if (contains) {
+                    modules.get(module).add(clazz);
+                } else {
+                    modules.put(module, new HashSet<>(Collections.singletonList(clazz)));
+                }
+            } else {
+                log.severe("The packet " + clazz.getSimpleName() + " was already registered");
+                return;
+            }
+        }
+
         int last = (packetIds.size() > 0) ? Collections.max(packetIds.entrySet(), HashMap.Entry.comparingByValue()).getValue() : -1;
-        packetIds.put(clazz, ++last);
+        log.fine("Registering packet " + clazz.getSimpleName() + " with packet id " + (++last));
+        packetIds.put(clazz, last);
+        handlers.put(clazz, new HashSet<>(Collections.singletonList(handler)));
+    }
+
+    @Override
+    public <T extends Packet> void registerPacket(NetworkModule module, Class<T> clazz) {
+        boolean contains;
+        if (!(contains = modules.containsKey(module)) || !modules.get(module).contains(clazz)) {
+            if (contains) {
+                modules.get(module).add(clazz);
+            } else {
+                modules.put(module, new HashSet<>(Collections.singletonList(clazz)));
+            }
+
+            int last = (packetIds.size() > 0) ? Collections.max(packetIds.entrySet(), HashMap.Entry.comparingByValue()).getValue() : -1;
+            log.fine("Registering packet " + clazz.getSimpleName() + " with packet id " + (++last));
+            packetIds.put(clazz, last);
+            handlers.put(clazz, new HashSet<>());
+        } else {
+            log.severe("The packet " + clazz.getSimpleName() + " was already registered");
+        }
+    }
+
+    public void unregisterPackets(NetworkModule module) {
+        if (modules.containsKey(module)) {
+            for (Class<? extends Packet> packet : modules.get(module)) {
+                packetIds.remove(packet);
+                handlers.remove(packet);
+            }
+            modules.remove(module);
+        }
+    }
+
+    @Override
+    public <T extends Packet> void registerAdditionalPacketHandler(Class<T> clazz, PacketHandler<T> handler) throws IllegalStateException {
+        if (handlers.containsKey(clazz)) {
+            handlers.get(clazz).add(handler);
+        } else {
+            throw new IllegalStateException("The packet " + clazz.getSimpleName() + " is not yet registered!");
+        }
     }
 
     @Override
@@ -127,8 +184,20 @@ public class ChannelPacketHandler extends SimpleChannelInboundHandler<Packet> im
     protected void channelRead0(ChannelHandlerContext chc, Packet packet) {
         log.info("received " + packet.getClass().getSimpleName() + " from " + chc.channel().remoteAddress().toString());
 
-        for (PacketHandler handler : packet.getHandlerList()) {
-            handler.onPacketReceive(packet, chc);
+        if (this.handlers.containsKey(packet.getClass())) {
+            Set<PacketHandler<? extends Packet>> handlers;
+
+            if ((handlers = this.handlers.get(packet.getClass())) != null) {
+                for (PacketHandler handler : handlers) {
+                    handler.onPacketReceive(packet, chc);
+                }
+            }
+        } else {
+            try {
+                throw new IllegalStateException("Packet " + packet.getClass().getSimpleName() + " is not registered!");
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -147,6 +216,7 @@ public class ChannelPacketHandler extends SimpleChannelInboundHandler<Packet> im
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.severe("Netty Exception: " + cause.getMessage());
+        cause.printStackTrace();
     }
 
     @Override

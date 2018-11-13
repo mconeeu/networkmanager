@@ -6,27 +6,13 @@
 
 package eu.mcone.networkmanager.api.network.packet;
 
-import eu.mcone.networkmanager.api.network.client.handler.PacketHandler;
 import io.netty.buffer.ByteBuf;
+import lombok.NoArgsConstructor;
 
 import java.io.*;
-import java.util.List;
 
+@NoArgsConstructor
 public abstract class Packet {
-
-    private static Packet INSTANCE;
-
-    protected Packet() {
-        INSTANCE = this;
-    }
-
-    public static void addHandler(PacketHandler handler) {
-        INSTANCE.getHandlerList().add(handler);
-    }
-
-    public static void removeHandler(PacketHandler handler) {
-        INSTANCE.getHandlerList().remove(handler);
-    }
 
     public void write(ByteBuf byteBuf) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -54,8 +40,6 @@ public abstract class Packet {
             e.printStackTrace();
         }
     }
-
-    public abstract List<PacketHandler> getHandlerList();
 
     public abstract void onWrite(DataOutputStream out) throws IOException;
 

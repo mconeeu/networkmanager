@@ -9,7 +9,7 @@ package eu.mcone.networkmanager.api;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import eu.mcone.networkmanager.api.manager.ModuleManager;
-import eu.mcone.networkmanager.api.network.server.ServerChannelPacketHandler;
+import eu.mcone.networkmanager.api.server.ServerChannelPacketHandler;
 import eu.mcone.networkmanager.core.api.console.ConsoleReader;
 import eu.mcone.networkmanager.core.api.database.Database;
 import eu.mcone.networkmanager.core.api.database.MongoDatabase;
@@ -45,4 +45,5 @@ public abstract class ModuleHost {
     public abstract JsonParser getJsonParser();
 
     public abstract void shutdown();
+
 }

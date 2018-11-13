@@ -1,8 +1,21 @@
+# IntelliJ
 .idea/
-host/target/
-core-api/target/
-core/target/
-host-api/target/
-core-api/dependency-reduced-pom.xml
-core-api/src/test/
-core/dependency-reduced-pom.xml
+*.iml
+*.ipr
+*.ivs
+
+# Eclipse
+.settings/
+.classpath
+.project
+
+# Netbeans
+nbproject/
+nbactions.xml
+
+# maven
+target/
+dependency-reduced-pom.xml
+
+# OS X
+.DS_Store

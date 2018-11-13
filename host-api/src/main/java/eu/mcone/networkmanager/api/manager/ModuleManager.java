@@ -9,30 +9,32 @@ package eu.mcone.networkmanager.api.manager;
 import eu.mcone.networkmanager.api.module.ModuleInfo;
 import eu.mcone.networkmanager.api.module.NetworkModule;
 
+import java.util.Set;
+
 public interface ModuleManager {
 
-    void reload();
+    Set<NetworkModule> getLoadedModules();
 
-    void close();
+    Set<ModuleInfo> getUnloadedModules();
+
 
     void loadModules();
 
-    void loadModule(ModuleInfo info);
+    void loadModule(String name);
 
-    void enableModules();
 
-    void enableModule(ModuleInfo info);
+    void enableLoadedModules();
 
-    void disableModule(ModuleInfo info);
+    void enableLoadedModule(String name);
 
-    void disableModules();
 
-    void reloadModule(ModuleInfo info);
+    void disableLoadedModules();
 
-    ModuleInfo getModuleInfo(String module);
+    void disableLoadedModule(String name);
 
-    NetworkModule getModule(ModuleInfo info);
 
-    NetworkModule getModule(String module);
+    void reloadLoadedModules();
+
+    void reloadLoadedModule(String name);
 
 }

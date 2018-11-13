@@ -16,23 +16,24 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Log
 public class ClientChannelPacketHandler extends SimpleChannelInboundHandler<Packet> implements PacketResolver {
 
     private final ClientBootstrap bootstrap;
     private Map<Class<? extends Packet>, Integer> packetIds;
+    private Map<Class<? extends Packet>, Set<PacketHandler<? extends Packet>>> handlers;
 
     ClientChannelPacketHandler(ClientBootstrap bootstrap) {
         this.bootstrap = bootstrap;
         this.packetIds = new HashMap<>();
+        this.handlers = new HashMap<>();
 
         packetIds.put(ClientRegisterPacketHost.class, 0);
         packetIds.put(PacketRegisterPacketClient.class, 1);
 
-        PacketRegisterPacketClient.addHandler((PacketHandler<PacketRegisterPacketClient>) (packet, chc) -> {
+        registerPacketHandler(PacketRegisterPacketClient.class, (packet, chc) -> {
             for (HashMap.Entry<Class<? extends Packet>, Integer> entry : packet.getRegisteredPackets().entrySet()) {
                 packetIds.put(entry.getKey(), entry.getValue());
             }
@@ -57,6 +58,14 @@ public class ClientChannelPacketHandler extends SimpleChannelInboundHandler<Pack
         return packetIds.getOrDefault(packet, null);
     }
 
+    public <T extends Packet> void registerPacketHandler(Class<T> clazz, PacketHandler<T> handler) {
+        if (handlers.containsKey(clazz)) {
+            handlers.get(clazz).add(handler);
+        } else {
+            handlers.put(clazz, new HashSet<>(Collections.singletonList(handler)));
+        }
+    }
+
     @Override
     public void channelActive(ChannelHandlerContext chc) {
         chc.writeAndFlush(new ClientRegisterPacketHost(bootstrap.getResourceBundleName()));
@@ -65,10 +74,13 @@ public class ClientChannelPacketHandler extends SimpleChannelInboundHandler<Pack
 
     @Override
     protected void channelRead0(ChannelHandlerContext chc, Packet packet) {
-        log.info("received "+packet.getClass().getSimpleName()+" from " + chc.channel().remoteAddress().toString());
+        log.info("received " + packet.getClass().getSimpleName() + " from " + chc.channel().remoteAddress().toString());
 
-        for (PacketHandler handler : packet.getHandlerList()) {
-            handler.onPacketReceive(packet, chc);
+        Set<PacketHandler<? extends Packet>> handlers;
+        if (this.handlers.containsKey(packet.getClass()) && (handlers = this.handlers.get(packet.getClass())) != null) {
+            for (PacketHandler handler : handlers) {
+                handler.onPacketReceive(packet, chc);
+            }
         }
     }
 

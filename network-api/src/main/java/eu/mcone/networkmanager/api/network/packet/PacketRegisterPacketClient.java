@@ -6,7 +6,6 @@
 
 package eu.mcone.networkmanager.api.network.packet;
 
-import eu.mcone.networkmanager.api.network.client.handler.PacketHandler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,20 +13,12 @@ import lombok.NoArgsConstructor;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
 @NoArgsConstructor
 public class PacketRegisterPacketClient extends Packet {
-
-    private static List<PacketHandler> handlerList = new ArrayList<>();
-    @Override
-    public List<PacketHandler> getHandlerList() {
-        return handlerList;
-    }
 
     @Getter
     private Map<Class<? extends Packet>, Integer> registeredPackets;
@@ -46,9 +37,15 @@ public class PacketRegisterPacketClient extends Packet {
     public void onRead(DataInputStream in) throws IOException {
         registeredPackets = new HashMap<>();
 
-        for (int i = 0; i < in.readInt(); i++) {
+        int amount = in.readInt();
+        for (int i = 0; i < amount; i++) {
             try {
-                registeredPackets.put(Class.forName(in.readUTF()).asSubclass(Packet.class), in.readInt());
+                String name = in.readUTF();
+                int id = in.readInt();
+
+                System.out.println("got packet "+name+" with id "+id);
+
+                registeredPackets.put(Class.forName(name).asSubclass(Packet.class), id);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }

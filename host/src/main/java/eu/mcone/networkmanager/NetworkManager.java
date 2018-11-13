@@ -67,6 +67,7 @@ public class NetworkManager extends ModuleHost {
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start moduleManager...");
         moduleManager = new ModuleManager();
+        moduleManager.loadModules();
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start server bootstrap...");
         new ServerBootstrap(channelPacketHandler);
@@ -75,7 +76,7 @@ public class NetworkManager extends ModuleHost {
         mongoConnection = new MongoConnection("db.mcone.eu", "admin", "T6KIq8gjmmF1k7futx0cJiJinQXgfguYXruds1dFx1LF5IsVPQjuDTnlI1zltpD9", "admin", 27017);
         mongoConnection.connect();
 
-        moduleManager.enableModules();
+        moduleManager.enableLoadedModules();
 
         log.finest(ConsoleColor.GREEN + "READY!");
     }
@@ -92,7 +93,7 @@ public class NetworkManager extends ModuleHost {
 
     public void shutdown() {
         log.info("Shutdown progress - Shutting down Modules...");
-        moduleManager.disableModules();
+        moduleManager.disableLoadedModules();
 
         log.info("Shutdown progress - Closing connection to database...");
         mongoConnection.disconnect();

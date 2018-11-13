@@ -13,8 +13,6 @@ import eu.mcone.networkmanager.core.api.database.Database;
 import lombok.Getter;
 import org.bson.codecs.configuration.CodecProvider;
 
-import java.util.ArrayList;
-
 public class MongoDatabaseImpl extends com.mongodb.client.internal.MongoDatabaseImpl implements eu.mcone.networkmanager.core.api.database.MongoDatabase {
 
     @Getter

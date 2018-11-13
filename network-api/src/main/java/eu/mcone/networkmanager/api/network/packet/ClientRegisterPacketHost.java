@@ -6,24 +6,17 @@
 
 package eu.mcone.networkmanager.api.network.packet;
 
-import eu.mcone.networkmanager.api.network.client.handler.PacketHandler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @AllArgsConstructor
+@NoArgsConstructor
 public class ClientRegisterPacketHost extends Packet {
-
-    private static List<PacketHandler> handlerList = new ArrayList<>();
-    @Override
-    public List<PacketHandler> getHandlerList() {
-        return handlerList;
-    }
 
     @Getter
     private String resourceBundleName;
@@ -37,4 +30,5 @@ public class ClientRegisterPacketHost extends Packet {
     public void onRead(DataInputStream out) throws IOException {
         resourceBundleName = out.readUTF();
     }
+
 }

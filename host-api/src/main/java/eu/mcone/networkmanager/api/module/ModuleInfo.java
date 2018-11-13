@@ -13,10 +13,18 @@ import java.io.File;
 
 @Data
 @AllArgsConstructor
-public class ModuleInfo {
+public class ModuleInfo implements Cloneable {
 
     private String name, author, main, description;
     private File file;
-    private boolean running;
+
+    public ModuleInfo clone() {
+        try {
+            return (ModuleInfo) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }
