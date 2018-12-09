@@ -7,10 +7,7 @@
 package eu.mcone.networkmanager.api.network.client;
 
 import eu.mcone.networkmanager.api.network.client.handler.PacketHandler;
-import eu.mcone.networkmanager.api.network.packet.ClientRegisterPacketHost;
-import eu.mcone.networkmanager.api.network.packet.Packet;
-import eu.mcone.networkmanager.api.network.packet.PacketRegisterPacketClient;
-import eu.mcone.networkmanager.api.network.packet.PacketResolver;
+import eu.mcone.networkmanager.api.network.packet.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.java.Log;
@@ -21,54 +18,16 @@ import java.util.*;
 @Log
 public class ClientChannelPacketHandler extends SimpleChannelInboundHandler<Packet> implements PacketResolver {
 
-    private final ClientBootstrap bootstrap;
-    private Map<Class<? extends Packet>, Integer> packetIds;
-    private Map<Class<? extends Packet>, Set<PacketHandler<? extends Packet>>> handlers;
+    private final ClientPacketManager manager;
 
-    ClientChannelPacketHandler(ClientBootstrap bootstrap) {
-        this.bootstrap = bootstrap;
-        this.packetIds = new HashMap<>();
-        this.handlers = new HashMap<>();
-
-        packetIds.put(ClientRegisterPacketHost.class, 0);
-        packetIds.put(PacketRegisterPacketClient.class, 1);
-
-        registerPacketHandler(PacketRegisterPacketClient.class, (packet, chc) -> {
-            for (HashMap.Entry<Class<? extends Packet>, Integer> entry : packet.getRegisteredPackets().entrySet()) {
-                packetIds.put(entry.getKey(), entry.getValue());
-            }
-
-            log.info("Successfully got all Packet-IDs from host. Calling onChannelActiveMethod");
-            bootstrap.client.onChannelActive(chc);
-        });
-    }
-
-    @Override
-    public Class<? extends Packet> getPacketById(int id) {
-        for (Map.Entry<Class<? extends Packet>, Integer> entry : packetIds.entrySet()) {
-            if (entry.getValue() == id) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public int getPacketId(Class<? extends Packet> packet) {
-        return packetIds.getOrDefault(packet, null);
-    }
-
-    public <T extends Packet> void registerPacketHandler(Class<T> clazz, PacketHandler<T> handler) {
-        if (handlers.containsKey(clazz)) {
-            handlers.get(clazz).add(handler);
-        } else {
-            handlers.put(clazz, new HashSet<>(Collections.singletonList(handler)));
-        }
+    public ClientChannelPacketHandler(ClientPacketManager manager) {
+        this.manager = manager;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext chc) {
-        chc.writeAndFlush(new ClientRegisterPacketHost(bootstrap.getResourceBundleName()));
+        manager.clear();
+        chc.writeAndFlush(new ClientRegisterPacketHost(manager.netty.getResourceBundleName()));
         log.info("new channel to " + chc.channel().remoteAddress().toString());
     }
 
@@ -77,7 +36,7 @@ public class ClientChannelPacketHandler extends SimpleChannelInboundHandler<Pack
         log.info("received " + packet.getClass().getSimpleName() + " from " + chc.channel().remoteAddress().toString());
 
         Set<PacketHandler<? extends Packet>> handlers;
-        if (this.handlers.containsKey(packet.getClass()) && (handlers = this.handlers.get(packet.getClass())) != null) {
+        if (manager.handlers.containsKey(packet.getClass()) && (handlers = manager.handlers.get(packet.getClass())) != null) {
             for (PacketHandler handler : handlers) {
                 handler.onPacketReceive(packet, chc);
             }
@@ -86,8 +45,8 @@ public class ClientChannelPacketHandler extends SimpleChannelInboundHandler<Pack
 
     @Override
     public void channelUnregistered(ChannelHandlerContext chc) {
-        bootstrap.client.onChannelUnregistered(chc);
-        bootstrap.scheduleReconnect();
+        manager.netty.client.onChannelUnregistered(chc);
+        manager.netty.scheduleReconnect();
     }
 
     @Override
@@ -101,4 +60,15 @@ public class ClientChannelPacketHandler extends SimpleChannelInboundHandler<Pack
         log.severe("Netty Exception:");
         cause.printStackTrace();
     }
+
+    @Override
+    public Class<? extends Packet> getPacketById(int id) {
+        return manager.getPacketById(id);
+    }
+
+    @Override
+    public int getPacketId(Class<? extends Packet> packet) {
+        return manager.getPacketId(packet);
+    }
+
 }

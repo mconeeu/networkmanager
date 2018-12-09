@@ -15,7 +15,9 @@ import io.netty.channel.Channel;
 import java.util.Collection;
 import java.util.UUID;
 
-public interface ServerChannelPacketHandler {
+public interface ServerPacketManager {
+
+    void registerConnectionListener(ConnectionListener listener);
 
     <T extends Packet> void registerPacket(NetworkModule module, Class<T> clazz, PacketHandler<T> handler);
 

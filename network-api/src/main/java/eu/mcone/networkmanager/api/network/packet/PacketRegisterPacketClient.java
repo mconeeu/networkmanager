@@ -43,12 +43,8 @@ public class PacketRegisterPacketClient extends Packet {
                 String name = in.readUTF();
                 int id = in.readInt();
 
-                System.out.println("got packet "+name+" with id "+id);
-
                 registeredPackets.put(Class.forName(name).asSubclass(Packet.class), id);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            } catch (ClassNotFoundException ignored) {}
         }
     }
 

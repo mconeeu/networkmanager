@@ -183,7 +183,7 @@ public class ModuleManager implements eu.mcone.networkmanager.api.manager.Module
 
     private void disableModule(NetworkModule module) {
         module.onDisable();
-        NetworkManager.getManager().getChannelPacketHandler().unregisterPackets(module);
+        NetworkManager.getManager().getPacketManager().unregisterPackets(module);
         loaded.remove(module);
     }
 

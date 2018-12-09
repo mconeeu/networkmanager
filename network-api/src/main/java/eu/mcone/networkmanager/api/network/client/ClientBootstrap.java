@@ -24,7 +24,7 @@ public class ClientBootstrap {
     private static final int PORT = 4567;
 
     @Getter
-    private final ClientChannelPacketHandler channelPacketHandler = new ClientChannelPacketHandler(this);
+    private final ClientPacketManager packetManager;
     @Getter
     private final String host, resourceBundleName;
 
@@ -32,6 +32,7 @@ public class ClientBootstrap {
     private int reconnectTrys;
 
     public ClientBootstrap(String host, String resourceBundleName, NetworkmanagerClient client) {
+        this.packetManager = new ClientPacketManager(this);
         this.host = host;
         this.resourceBundleName = resourceBundleName;
         this.client = client;
@@ -52,9 +53,11 @@ public class ClientBootstrap {
                         .handler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             public void initChannel(SocketChannel ch) throws Exception {
-                                ch.pipeline().addLast(new Decoder(channelPacketHandler));
-                                ch.pipeline().addLast(new Encoder(channelPacketHandler));
-                                ch.pipeline().addLast(channelPacketHandler);
+                                ClientChannelPacketHandler handler = new ClientChannelPacketHandler(packetManager);
+
+                                ch.pipeline().addLast(new Decoder(handler));
+                                ch.pipeline().addLast(new Encoder(handler));
+                                ch.pipeline().addLast(handler);
                             }
                         });
 
@@ -72,12 +75,9 @@ public class ClientBootstrap {
             } catch (Exception e) {
                 reconnectTrys++;
 
-                workerGroup.shutdownGracefully();
-
                 System.err.println("Could not connect to Master. Reconnecting... ["+reconnectTrys+"]");
                 System.err.println(e.getMessage());
             } finally {
-                System.out.println("shutdown workergroup");
                 workerGroup.shutdownGracefully();
             }
         });

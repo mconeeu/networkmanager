@@ -23,7 +23,7 @@ public class ServerBootstrap {
     private static final int PORT = 4567;
     private static final boolean EPOLL = Epoll.isAvailable();
 
-    public ServerBootstrap(ChannelPacketHandler handler) {
+    public ServerBootstrap(PacketManager manager) {
         new Thread(() -> {
             EventLoopGroup bossGroup = EPOLL ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
             EventLoopGroup workerGroup = EPOLL ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
@@ -35,6 +35,8 @@ public class ServerBootstrap {
                         .childHandler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             public void initChannel(SocketChannel ch) {
+                                ChannelPacketHandler handler = new ChannelPacketHandler(manager);
+
                                 ch.pipeline().addLast(new Decoder(handler));
                                 ch.pipeline().addLast(new Encoder(handler));
                                 ch.pipeline().addLast(handler);

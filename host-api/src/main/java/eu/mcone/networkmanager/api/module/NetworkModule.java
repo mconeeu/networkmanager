@@ -35,11 +35,11 @@ public abstract class NetworkModule {
     }
 
     protected <T extends Packet> void registerPacket(Class<T> clazz, PacketHandler<T> handler) {
-        ModuleHost.getInstance().getChannelPacketHandler().registerPacket(this, clazz, handler);
+        ModuleHost.getInstance().getPacketManager().registerPacket(this, clazz, handler);
     }
 
     protected <T extends Packet> void registerPacket(Class<T> clazz) {
-        ModuleHost.getInstance().getChannelPacketHandler().registerPacket(this, clazz);
+        ModuleHost.getInstance().getPacketManager().registerPacket(this, clazz);
     }
 
 }

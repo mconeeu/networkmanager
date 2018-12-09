@@ -17,8 +17,8 @@ import eu.mcone.networkmanager.core.console.ConsoleReader;
 import eu.mcone.networkmanager.core.console.log.MconeLogger;
 import eu.mcone.networkmanager.core.database.MongoConnection;
 import eu.mcone.networkmanager.module.ModuleManager;
+import eu.mcone.networkmanager.network.PacketManager;
 import eu.mcone.networkmanager.network.ServerBootstrap;
-import eu.mcone.networkmanager.network.ChannelPacketHandler;
 import lombok.Getter;
 import lombok.extern.java.Log;
 
@@ -40,7 +40,7 @@ public class NetworkManager extends ModuleHost {
     @Getter
     private MconeLogger mconeLogger;
     @Getter
-    private ChannelPacketHandler channelPacketHandler;
+    private PacketManager packetManager;
     @Getter
     private ModuleManager moduleManager;
     @Getter
@@ -63,14 +63,14 @@ public class NetworkManager extends ModuleHost {
 
         log.info("Enable progress - " + ConsoleColor.AQUA + "Welcome to mc1-networkmanager. System is starting...");
 
-        channelPacketHandler = new ChannelPacketHandler();
+        packetManager = new PacketManager();
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start moduleManager...");
         moduleManager = new ModuleManager();
         moduleManager.loadModules();
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start server bootstrap...");
-        new ServerBootstrap(channelPacketHandler);
+        new ServerBootstrap(packetManager);
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start connection to MongoDatabase...");
         mongoConnection = new MongoConnection("db.mcone.eu", "admin", "T6KIq8gjmmF1k7futx0cJiJinQXgfguYXruds1dFx1LF5IsVPQjuDTnlI1zltpD9", "admin", 27017);
