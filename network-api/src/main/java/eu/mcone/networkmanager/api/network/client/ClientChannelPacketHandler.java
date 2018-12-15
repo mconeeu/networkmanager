@@ -33,7 +33,7 @@ public class ClientChannelPacketHandler extends SimpleChannelInboundHandler<Pack
 
     @Override
     protected void channelRead0(ChannelHandlerContext chc, Packet packet) {
-        log.info("received " + packet.getClass().getSimpleName() + " from " + chc.channel().remoteAddress().toString());
+        log.finest("received " + packet.getClass().getSimpleName() + " from " + chc.channel().remoteAddress().toString());
 
         Set<PacketHandler<? extends Packet>> handlers;
         if (manager.handlers.containsKey(packet.getClass()) && (handlers = manager.handlers.get(packet.getClass())) != null) {

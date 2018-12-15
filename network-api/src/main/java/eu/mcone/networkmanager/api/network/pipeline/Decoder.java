@@ -13,9 +13,11 @@ import io.netty.buffer.EmptyByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
 
 import java.util.List;
 
+@Log
 @AllArgsConstructor
 public class Decoder extends ByteToMessageDecoder {
 
@@ -27,6 +29,8 @@ public class Decoder extends ByteToMessageDecoder {
         Class<? extends Packet> packetClass = resolver.getPacketById(in.readInt());
 
         if (packetClass != null) {
+            log.finest("Decoding packet "+packetClass.getSimpleName()+" from "+ctx.channel().remoteAddress());
+
             Packet packet = packetClass.newInstance();
             packet.read(in);
 

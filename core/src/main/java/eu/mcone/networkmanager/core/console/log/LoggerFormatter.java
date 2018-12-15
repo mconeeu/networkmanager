@@ -33,7 +33,7 @@ public class LoggerFormatter extends Formatter {
                 .append(record.getLevel().getLocalizedName())
                 .append("] ");
 
-        if (addClassName && loggerName.length > 0) {
+        if (addClassName && !record.getLoggerName().contains("noClassName") && loggerName.length > 0) {
             formatted.append("[")
                     .append(loggerName[loggerName.length - 1])
                     .append("] ");

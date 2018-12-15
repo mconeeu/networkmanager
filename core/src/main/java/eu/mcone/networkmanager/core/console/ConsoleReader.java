@@ -24,7 +24,7 @@ public class ConsoleReader implements eu.mcone.networkmanager.core.api.console.C
             Scanner sc = new Scanner(System.in);
 
             String line;
-            while(sc.hasNext() && (line = sc.next()) != null) {
+            while(sc.hasNextLine() && (line = sc.nextLine()) != null) {
                 String[] args = line.split(" ");
 
                 for (HashMap.Entry<String, CommandExecutor> e : executors.entrySet()) {

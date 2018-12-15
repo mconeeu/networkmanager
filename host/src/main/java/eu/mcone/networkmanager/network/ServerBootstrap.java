@@ -15,7 +15,13 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 import lombok.extern.java.Log;
+
+import javax.net.ssl.SSLException;
+import java.security.cert.CertificateException;
 
 @Log
 public class ServerBootstrap {
@@ -23,43 +29,87 @@ public class ServerBootstrap {
     private static final int PORT = 4567;
     private static final boolean EPOLL = Epoll.isAvailable();
 
-    public ServerBootstrap(PacketManager manager) {
-        new Thread(() -> {
-            EventLoopGroup bossGroup = EPOLL ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
-            EventLoopGroup workerGroup = EPOLL ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
+    private final EventLoopGroup bossGroup;
+    private final EventLoopGroup workerGroup;
 
-            try {
-                io.netty.bootstrap.ServerBootstrap b = new io.netty.bootstrap.ServerBootstrap();
-                b.group(bossGroup, workerGroup)
-                        .channel(EPOLL ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
-                        .childHandler(new ChannelInitializer<SocketChannel>() {
-                            @Override
-                            public void initChannel(SocketChannel ch) {
-                                ChannelPacketHandler handler = new ChannelPacketHandler(manager);
+    private ChannelFuture masterChannel;
+    private ChannelFuture webMasterChannel;
 
-                                ch.pipeline().addLast(new Decoder(handler));
-                                ch.pipeline().addLast(new Encoder(handler));
-                                ch.pipeline().addLast(handler);
-                            }
-                        })
-                        .option(ChannelOption.SO_BACKLOG, 128)
-                        .childOption(ChannelOption.SO_KEEPALIVE, true);
+    public ServerBootstrap(PacketManager packetManager, WebRequestManager requestManager) {
+        bossGroup = EPOLL ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
+        workerGroup = EPOLL ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
 
-                ChannelFuture f = b.bind(PORT).sync().addListener((ChannelFutureListener) channelFuture -> {
-                    if (channelFuture.isSuccess()) {
-                        log.info("Netty is listening @ Port:" + PORT);
-                    } else {
-                        log.info("Failed to bind @ Port:" + PORT);
-                    }
-                }).addListener(ChannelFutureListener.CLOSE_ON_FAILURE).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-                f.channel().closeFuture().sync();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                workerGroup.shutdownGracefully();
-                bossGroup.shutdownGracefully();
-            }
-        }).start();
+        try {
+            masterChannel = new io.netty.bootstrap.ServerBootstrap()
+                    .group(bossGroup, workerGroup)
+                    .channel(EPOLL ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel ch) {
+                            ChannelPacketHandler handler = new ChannelPacketHandler(packetManager);
+
+                            ch.pipeline()
+                                    .addLast("decoder", new Decoder(handler))
+                                    .addLast("encoder", new Encoder(handler))
+                                    .addLast("packetHandler", handler);
+                        }
+                    })
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .bind(PORT)
+                    .sync()
+                    .addListener((ChannelFutureListener) channelFuture -> {
+                        if (channelFuture.isSuccess()) {
+                            log.info("Netty is listening @ Port:" + PORT);
+                        } else {
+                            log.info("Netty failed to bind @ Port:" + PORT);
+                        }
+                    })
+                    .addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
+                    .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+
+            webMasterChannel = new io.netty.bootstrap.ServerBootstrap()
+                    .group(bossGroup, workerGroup)
+                    .channel(EPOLL ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws CertificateException, SSLException {
+                            SelfSignedCertificate ssc = new SelfSignedCertificate();
+
+                            ch.pipeline()
+                                    /*.addLast(SslContextBuilder.forServer(
+                                            ssc.certificate(),
+                                            ssc.privateKey()).build().newHandler(ch.alloc())
+                                    )*/
+                                    .addLast(new HttpServerCodec())
+                                    .addLast(new HttpObjectAggregator(65536))
+                                    .addLast(new ChannelWebRequestHandler(requestManager));
+                        }
+                    })
+                    .bind(8080)
+                    .sync()
+                    .addListener((ChannelFutureListener) channelFuture -> {
+                        if (channelFuture.isSuccess()) {
+                            log.info("Netty Web is listening @ Port:" + PORT);
+                        } else {
+                            log.info("Netty Web failed to bind @ Port:" + PORT);
+                        }
+                    });
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void shutdown() {
+        workerGroup.shutdownGracefully();
+        bossGroup.shutdownGracefully();
+
+        try {
+            masterChannel.channel().closeFuture().sync();
+            webMasterChannel.channel().closeFuture().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }

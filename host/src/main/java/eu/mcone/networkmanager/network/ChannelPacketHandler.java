@@ -15,6 +15,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.java.Log;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
@@ -69,7 +70,6 @@ public class ChannelPacketHandler extends SimpleChannelInboundHandler<Packet> im
             }
         }
 
-        System.out.println("calling listeners");
         for (ConnectionListener listener : manager.listeners) {
             listener.onChannelUnregistered(ctx);
         }
@@ -77,8 +77,12 @@ public class ChannelPacketHandler extends SimpleChannelInboundHandler<Packet> im
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.severe("Netty Exception: " + cause.getMessage());
-        cause.printStackTrace();
+        if (cause instanceof IOException) {
+            log.severe(cause.getMessage() + " ("+ctx.channel().remoteAddress()+")");
+        } else {
+            log.severe("Netty Exception:");
+            cause.printStackTrace();
+        }
 
         for (ConnectionListener listener : manager.listeners) {
             listener.exceptionCaught(ctx, cause);

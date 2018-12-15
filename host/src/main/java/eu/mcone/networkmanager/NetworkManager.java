@@ -19,6 +19,7 @@ import eu.mcone.networkmanager.core.database.MongoConnection;
 import eu.mcone.networkmanager.module.ModuleManager;
 import eu.mcone.networkmanager.network.PacketManager;
 import eu.mcone.networkmanager.network.ServerBootstrap;
+import eu.mcone.networkmanager.network.WebRequestManager;
 import lombok.Getter;
 import lombok.extern.java.Log;
 
@@ -40,19 +41,26 @@ public class NetworkManager extends ModuleHost {
     @Getter
     private MconeLogger mconeLogger;
     @Getter
-    private PacketManager packetManager;
-    @Getter
-    private ModuleManager moduleManager;
-    @Getter
     private ConsoleReader consoleReader;
+
     @Getter
     private ExecutorService threadPool;
     @Getter
     private MongoConnection mongoConnection;
+    @Getter
+    private ModuleManager moduleManager;
+
+    private ServerBootstrap serverBootstrap;
+    @Getter
+    private PacketManager packetManager;
+    @Getter
+    private WebRequestManager webRequestManager;
 
     private NetworkManager() {
         setInstance(this);
         manager = this;
+
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 
         gson = new Gson();
         jsonParser = new JsonParser();
@@ -64,13 +72,14 @@ public class NetworkManager extends ModuleHost {
         log.info("Enable progress - " + ConsoleColor.AQUA + "Welcome to mc1-networkmanager. System is starting...");
 
         packetManager = new PacketManager();
+        webRequestManager = new WebRequestManager();
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start moduleManager...");
         moduleManager = new ModuleManager();
         moduleManager.loadModules();
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start server bootstrap...");
-        new ServerBootstrap(packetManager);
+        serverBootstrap = new ServerBootstrap(packetManager, webRequestManager);
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start connection to MongoDatabase...");
         mongoConnection = new MongoConnection("db.mcone.eu", "admin", "T6KIq8gjmmF1k7futx0cJiJinQXgfguYXruds1dFx1LF5IsVPQjuDTnlI1zltpD9", "admin", 27017);
@@ -78,7 +87,7 @@ public class NetworkManager extends ModuleHost {
 
         moduleManager.enableLoadedModules();
 
-        log.finest(ConsoleColor.GREEN + "READY!");
+        log.info(ConsoleColor.GREEN + "The network-manager is now ready!");
     }
 
     public static void main(String[] args) {
@@ -90,10 +99,12 @@ public class NetworkManager extends ModuleHost {
         return mongoConnection.getDatabase(database);
     }
 
-
     public void shutdown() {
         log.info("Shutdown progress - Shutting down Modules...");
         moduleManager.disableLoadedModules();
+
+        log.info("Shutdown progress - Closing netty server...");
+        serverBootstrap.shutdown();
 
         log.info("Shutdown progress - Closing connection to database...");
         mongoConnection.disconnect();

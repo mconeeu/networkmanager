@@ -62,17 +62,8 @@ public class ConsoleCommandExecutor implements CommandExecutor {
                 NetworkManager.getInstance().getModuleManager().reloadLoadedModule(args[0]);
             } else if (cmd.equalsIgnoreCase("shutdown")) {
                 NetworkManager.getInstance().shutdown();
-            } else {
-                log.info(ConsoleColor.RED + "Please use /help");
             }
         }
     }
 
-    private String isRunning(final Boolean isRunning) {
-        if (isRunning) {
-            return ConsoleColor.GREEN + "Running";
-        } else {
-            return ConsoleColor.RED + "Stopped";
-        }
-    }
 }

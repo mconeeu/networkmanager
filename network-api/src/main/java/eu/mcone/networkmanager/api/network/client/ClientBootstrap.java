@@ -17,7 +17,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Getter;
+import lombok.extern.java.Log;
 
+@Log
 public class ClientBootstrap {
 
     private static final boolean EPOLL = Epoll.isAvailable();
@@ -64,10 +66,10 @@ public class ClientBootstrap {
                 ChannelFuture f = bootstrap.connect(host, PORT).sync();
                 f.addListener((ChannelFutureListener) channelFuture -> {
                     if (channelFuture.isSuccess()) {
-                        System.out.println("Netty is connected to "+host+" @ Port:" + PORT);
+                        log.info("Netty is connected to "+host+" @ Port:" + PORT);
                         reconnectTrys = 0;
                     } else {
-                        System.out.println("Failed to connect to "+host+" @ Port:" + PORT);
+                        log.severe("Failed to connect to "+host+" @ Port:" + PORT);
                     }
                 });
 
