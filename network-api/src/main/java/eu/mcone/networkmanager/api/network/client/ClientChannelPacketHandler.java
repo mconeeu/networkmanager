@@ -6,7 +6,7 @@
 
 package eu.mcone.networkmanager.api.network.client;
 
-import eu.mcone.networkmanager.api.network.client.handler.PacketHandler;
+import eu.mcone.networkmanager.api.network.packet.PacketHandler;
 import eu.mcone.networkmanager.api.network.packet.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

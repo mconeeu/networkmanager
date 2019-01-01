@@ -48,8 +48,8 @@ public class ClientBootstrap {
             EventLoopGroup workerGroup = EPOLL ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
 
             try {
-                Bootstrap bootstrap = new Bootstrap();
-                bootstrap.group(workerGroup)
+                new Bootstrap()
+                        .group(workerGroup)
                         .channel(EPOLL ? EpollSocketChannel.class : NioSocketChannel.class)
                         .option(ChannelOption.SO_KEEPALIVE, true)
                         .handler(new ChannelInitializer<SocketChannel>() {
@@ -61,19 +61,20 @@ public class ClientBootstrap {
                                 ch.pipeline().addLast(new Encoder(handler));
                                 ch.pipeline().addLast(handler);
                             }
-                        });
-
-                ChannelFuture f = bootstrap.connect(host, PORT).sync();
-                f.addListener((ChannelFutureListener) channelFuture -> {
-                    if (channelFuture.isSuccess()) {
-                        log.info("Netty is connected to "+host+" @ Port:" + PORT);
-                        reconnectTrys = 0;
-                    } else {
-                        log.severe("Failed to connect to "+host+" @ Port:" + PORT);
-                    }
-                });
-
-                f.channel().closeFuture().sync();
+                        })
+                        .connect(host, PORT)
+                        .sync()
+                        .addListener((ChannelFutureListener) channelFuture -> {
+                            if (channelFuture.isSuccess()) {
+                                log.info("Netty is connected to "+host+" @ Port:" + PORT);
+                                reconnectTrys = 0;
+                            } else {
+                                log.severe("Failed to connect to "+host+" @ Port:" + PORT);
+                            }
+                        })
+                        .channel()
+                        .closeFuture()
+                        .sync();
             } catch (Exception e) {
                 reconnectTrys++;
 

@@ -43,6 +43,6 @@ public abstract class Packet {
 
     public abstract void onWrite(DataOutputStream out) throws IOException;
 
-    public abstract void onRead(DataInputStream out) throws IOException;
+    public abstract void onRead(DataInputStream in) throws IOException;
 
 }

@@ -15,13 +15,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.ssl.util.SelfSignedCertificate;
 import lombok.extern.java.Log;
-
-import javax.net.ssl.SSLException;
-import java.security.cert.CertificateException;
 
 @Log
 public class ServerBootstrap {
@@ -29,19 +23,15 @@ public class ServerBootstrap {
     private static final int PORT = 4567;
     private static final boolean EPOLL = Epoll.isAvailable();
 
-    private final EventLoopGroup bossGroup;
-    private final EventLoopGroup workerGroup;
-
+    private final EventLoopGroup eventLoop;
     private ChannelFuture masterChannel;
-    private ChannelFuture webMasterChannel;
 
-    public ServerBootstrap(PacketManager packetManager, WebRequestManager requestManager) {
-        bossGroup = EPOLL ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
-        workerGroup = EPOLL ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
+    public ServerBootstrap(PacketManager packetManager) {
+        eventLoop = EPOLL ? new EpollEventLoopGroup(10) : new NioEventLoopGroup(10);
 
         try {
             masterChannel = new io.netty.bootstrap.ServerBootstrap()
-                    .group(bossGroup, workerGroup)
+                    .group(eventLoop)
                     .channel(EPOLL ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
@@ -67,46 +57,16 @@ public class ServerBootstrap {
                     })
                     .addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
                     .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-
-            webMasterChannel = new io.netty.bootstrap.ServerBootstrap()
-                    .group(bossGroup, workerGroup)
-                    .channel(EPOLL ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws CertificateException, SSLException {
-                            SelfSignedCertificate ssc = new SelfSignedCertificate();
-
-                            ch.pipeline()
-                                    /*.addLast(SslContextBuilder.forServer(
-                                            ssc.certificate(),
-                                            ssc.privateKey()).build().newHandler(ch.alloc())
-                                    )*/
-                                    .addLast(new HttpServerCodec())
-                                    .addLast(new HttpObjectAggregator(65536))
-                                    .addLast(new ChannelWebRequestHandler(requestManager));
-                        }
-                    })
-                    .bind(8080)
-                    .sync()
-                    .addListener((ChannelFutureListener) channelFuture -> {
-                        if (channelFuture.isSuccess()) {
-                            log.info("Netty Web is listening @ Port:" + PORT);
-                        } else {
-                            log.info("Netty Web failed to bind @ Port:" + PORT);
-                        }
-                    });
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     public void shutdown() {
-        workerGroup.shutdownGracefully();
-        bossGroup.shutdownGracefully();
+        eventLoop.shutdownGracefully();
 
         try {
             masterChannel.channel().closeFuture().sync();
-            webMasterChannel.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

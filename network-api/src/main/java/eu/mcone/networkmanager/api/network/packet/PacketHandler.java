@@ -4,9 +4,8 @@
  *
  */
 
-package eu.mcone.networkmanager.api.network.client.handler;
+package eu.mcone.networkmanager.api.network.packet;
 
-import eu.mcone.networkmanager.api.network.packet.Packet;
 import io.netty.channel.ChannelHandlerContext;
 
 public interface PacketHandler<T extends Packet> {

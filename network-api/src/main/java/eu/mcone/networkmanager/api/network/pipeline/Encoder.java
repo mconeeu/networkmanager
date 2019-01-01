@@ -21,7 +21,7 @@ public class Encoder extends MessageToByteEncoder<Packet> {
     private PacketResolver resolver;
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, Packet packet, ByteBuf out) {
+    public void encode(ChannelHandlerContext ctx, Packet packet, ByteBuf out) {
         int packetID = resolver.getPacketId(packet.getClass());
         log.finest("Encoding packet "+packet.getClass().getSimpleName()+" to "+ctx.channel().remoteAddress());
 

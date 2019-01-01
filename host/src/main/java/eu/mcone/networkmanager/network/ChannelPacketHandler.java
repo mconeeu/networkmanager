@@ -6,26 +6,23 @@
 
 package eu.mcone.networkmanager.network;
 
-import eu.mcone.networkmanager.api.network.client.handler.PacketHandler;
 import eu.mcone.networkmanager.api.network.packet.Packet;
+import eu.mcone.networkmanager.api.network.packet.PacketHandler;
 import eu.mcone.networkmanager.api.network.packet.PacketResolver;
 import eu.mcone.networkmanager.api.server.ConnectionListener;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Set;
-import java.util.UUID;
 
 @Log
 public class ChannelPacketHandler extends SimpleChannelInboundHandler<Packet> implements PacketResolver {
 
     private PacketManager manager;
 
-    public ChannelPacketHandler(PacketManager manager) {
+    ChannelPacketHandler(PacketManager manager) {
         this.manager = manager;
     }
 
@@ -62,13 +59,6 @@ public class ChannelPacketHandler extends SimpleChannelInboundHandler<Packet> im
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) {
         log.info("unregister channel to " + ctx.channel().remoteAddress().toString());
-
-        for (HashMap.Entry<UUID, Channel> entry : manager.channels.entrySet()) {
-            if (entry.getValue().equals(ctx.channel())) {
-                manager.channels.remove(entry.getKey());
-                break;
-            }
-        }
 
         for (ConnectionListener listener : manager.listeners) {
             listener.onChannelUnregistered(ctx);

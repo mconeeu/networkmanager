@@ -4,10 +4,12 @@
  *
  */
 
-package eu.mcone.networkmanager.api.server;
+package eu.mcone.networkmanager.api.event;
 
-public interface ServerWebRequestManager {
+public interface Cancellable {
 
-    void registerWebRequestListener(String[] uri, WebRequestListener listener);
+    void setCancelled(boolean cancel);
+
+    boolean isCancelled();
 
 }

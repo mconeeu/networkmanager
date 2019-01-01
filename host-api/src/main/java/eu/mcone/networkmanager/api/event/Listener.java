@@ -4,6 +4,10 @@
  *
  */
 
-package eu.mcone.networkmanager.api.network.client.handler;
+package eu.mcone.networkmanager.api.event;
 
-public interface WebRequestHandler {}
+public interface Listener<E extends Event> {
+
+    void on(E event);
+
+}

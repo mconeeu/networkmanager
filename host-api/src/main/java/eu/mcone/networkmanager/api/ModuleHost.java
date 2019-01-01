@@ -8,9 +8,10 @@ package eu.mcone.networkmanager.api;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
+import eu.mcone.networkmanager.api.manager.EventManager;
 import eu.mcone.networkmanager.api.manager.ModuleManager;
 import eu.mcone.networkmanager.api.server.ServerPacketManager;
-import eu.mcone.networkmanager.api.server.ServerWebRequestManager;
+import eu.mcone.networkmanager.api.server.ServerClientRequestManager;
 import eu.mcone.networkmanager.core.api.console.ConsoleReader;
 import eu.mcone.networkmanager.core.api.database.Database;
 import eu.mcone.networkmanager.core.api.database.MongoDatabase;
@@ -37,11 +38,13 @@ public abstract class ModuleHost {
 
     public abstract ModuleManager getModuleManager();
 
+    public abstract EventManager getEventManager();
+
     public abstract MongoDatabase getMongoDatabase(Database database);
 
     public abstract ServerPacketManager getPacketManager();
 
-    public abstract ServerWebRequestManager getWebRequestManager();
+    public abstract ServerClientRequestManager getClientRequestManager();
 
     public abstract Gson getGson();
 

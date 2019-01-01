@@ -16,10 +16,11 @@ import eu.mcone.networkmanager.core.api.database.MongoDatabase;
 import eu.mcone.networkmanager.core.console.ConsoleReader;
 import eu.mcone.networkmanager.core.console.log.MconeLogger;
 import eu.mcone.networkmanager.core.database.MongoConnection;
+import eu.mcone.networkmanager.module.EventManager;
 import eu.mcone.networkmanager.module.ModuleManager;
 import eu.mcone.networkmanager.network.PacketManager;
 import eu.mcone.networkmanager.network.ServerBootstrap;
-import eu.mcone.networkmanager.network.WebRequestManager;
+import eu.mcone.networkmanager.network.ClientRequestManager;
 import lombok.Getter;
 import lombok.extern.java.Log;
 
@@ -49,12 +50,14 @@ public class NetworkManager extends ModuleHost {
     private MongoConnection mongoConnection;
     @Getter
     private ModuleManager moduleManager;
+    @Getter
+    private EventManager eventManager;
 
     private ServerBootstrap serverBootstrap;
     @Getter
     private PacketManager packetManager;
     @Getter
-    private WebRequestManager webRequestManager;
+    private ClientRequestManager clientRequestManager;
 
     private NetworkManager() {
         setInstance(this);
@@ -68,22 +71,28 @@ public class NetworkManager extends ModuleHost {
         threadPool = Executors.newCachedThreadPool();
         consoleReader = new ConsoleReader();
         consoleReader.registerCommand(new ConsoleCommandExecutor());
+        eventManager = new EventManager();
 
         log.info("Enable progress - " + ConsoleColor.AQUA + "Welcome to mc1-networkmanager. System is starting...");
 
-        packetManager = new PacketManager();
-        webRequestManager = new WebRequestManager();
+        clientRequestManager = new ClientRequestManager();
+        packetManager = new PacketManager(clientRequestManager);
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start moduleManager...");
         moduleManager = new ModuleManager();
         moduleManager.loadModules();
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start server bootstrap...");
-        serverBootstrap = new ServerBootstrap(packetManager, webRequestManager);
+        serverBootstrap = new ServerBootstrap(packetManager);
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start connection to MongoDatabase...");
-        mongoConnection = new MongoConnection("db.mcone.eu", "admin", "T6KIq8gjmmF1k7futx0cJiJinQXgfguYXruds1dFx1LF5IsVPQjuDTnlI1zltpD9", "admin", 27017);
-        mongoConnection.connect();
+        mongoConnection = new MongoConnection(
+                "db.mcone.eu",
+                "admin",
+                "T6KIq8gjmmF1k7futx0cJiJinQXgfguYXruds1dFx1LF5IsVPQjuDTnlI1zltpD9",
+                "admin",
+                27017
+        ).connect();
 
         moduleManager.enableLoadedModules();
 

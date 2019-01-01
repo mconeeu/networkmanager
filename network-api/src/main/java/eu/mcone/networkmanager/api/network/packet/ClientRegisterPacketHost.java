@@ -27,8 +27,8 @@ public class ClientRegisterPacketHost extends Packet {
     }
 
     @Override
-    public void onRead(DataInputStream out) throws IOException {
-        resourceBundleName = out.readUTF();
+    public void onRead(DataInputStream in) throws IOException {
+        resourceBundleName = in.readUTF();
     }
 
 }

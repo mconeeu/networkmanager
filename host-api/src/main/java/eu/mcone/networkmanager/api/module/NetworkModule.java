@@ -7,7 +7,7 @@
 package eu.mcone.networkmanager.api.module;
 
 import eu.mcone.networkmanager.api.ModuleHost;
-import eu.mcone.networkmanager.api.network.client.handler.PacketHandler;
+import eu.mcone.networkmanager.api.network.packet.PacketHandler;
 import eu.mcone.networkmanager.api.network.packet.Packet;
 import lombok.NoArgsConstructor;
 

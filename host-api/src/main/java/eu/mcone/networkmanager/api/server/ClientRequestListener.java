@@ -6,13 +6,13 @@
 
 package eu.mcone.networkmanager.api.server;
 
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
+import com.google.gson.JsonElement;
+import io.netty.handler.codec.http.HttpMethod;
 
 import java.util.LinkedList;
 
-public interface WebRequestListener {
+public interface ClientRequestListener {
 
-    FullHttpResponse onRequest(FullHttpRequest request, LinkedList<String> uri);
+    HostResponse onClientRequest(HttpMethod method, LinkedList<String> uri, JsonElement data);
 
 }
