@@ -13,12 +13,14 @@
     <groupId>eu.mcone.networkmanager</groupId>
     <artifactId>mcone-networkmanager</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
+
     <modules>
         <module>host-api</module>
         <module>host</module>
         <module>core-api</module>
         <module>core</module>
+        <module>network-client</module>
         <module>network-api</module>
     </modules>
 

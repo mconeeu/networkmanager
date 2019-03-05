@@ -16,20 +16,18 @@ import lombok.Getter;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.UuidCodecProvider;
 import org.bson.codecs.configuration.CodecProvider;
+import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
-
 public class MongoConnection {
 
-    private final static CodecRegistry CODEC_REGISTRY = fromRegistries(
+    private final static CodecRegistry CODEC_REGISTRY = CodecRegistries.fromRegistries(
             MongoClient.getDefaultCodecRegistry(),
-            fromProviders(
+            CodecRegistries.fromProviders(
                     PojoCodecProvider.builder()
                             .automatic(true)
                             .build(),
@@ -104,7 +102,7 @@ public class MongoConnection {
     }
 
     public static MongoCollection addCodecProviders(MongoCollection collection, CodecProvider... providers) {
-        return collection.withCodecRegistry(fromRegistries(CODEC_REGISTRY, fromProviders(providers)));
+        return collection.withCodecRegistry(CodecRegistries.fromRegistries(CODEC_REGISTRY, CodecRegistries.fromProviders(providers)));
     }
 
 }
