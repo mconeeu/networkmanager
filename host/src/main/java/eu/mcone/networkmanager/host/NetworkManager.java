@@ -8,10 +8,10 @@ package eu.mcone.networkmanager.host;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
+import com.mongodb.client.MongoDatabase;
 import eu.mcone.networkmanager.api.messaging.ClientMessageManager;
 import eu.mcone.networkmanager.core.api.console.ConsoleColor;
 import eu.mcone.networkmanager.core.api.database.Database;
-import eu.mcone.networkmanager.core.api.database.MongoDatabase;
 import eu.mcone.networkmanager.core.console.ConsoleReader;
 import eu.mcone.networkmanager.core.console.log.MconeLogger;
 import eu.mcone.networkmanager.core.database.MongoConnection;

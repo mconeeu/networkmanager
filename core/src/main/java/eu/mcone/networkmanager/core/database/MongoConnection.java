@@ -7,11 +7,13 @@
 package eu.mcone.networkmanager.core.database;
 
 
-import com.mongodb.*;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.internal.OperationExecutor;
+import com.mongodb.client.MongoDatabase;
 import eu.mcone.networkmanager.core.api.database.Database;
-import eu.mcone.networkmanager.core.api.database.MongoDatabase;
 import lombok.Getter;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.UuidCodecProvider;
@@ -20,13 +22,12 @@ import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import static com.mongodb.MongoClientSettings.getDefaultCodecRegistry;
 
 public class MongoConnection {
 
     private final static CodecRegistry CODEC_REGISTRY = CodecRegistries.fromRegistries(
-            MongoClient.getDefaultCodecRegistry(),
+            getDefaultCodecRegistry(),
             CodecRegistries.fromProviders(
                     PojoCodecProvider.builder()
                             .automatic(true)
@@ -56,22 +57,19 @@ public class MongoConnection {
 
     public MongoConnection connect() {
         if (userName == null) {
-            client = new MongoClient(
-                    host, port
-            );
-
+            client = MongoClients.create("mongodb://"+host+":"+port);
             return this;
         } else {
-            client = new MongoClient(
-                    new ServerAddress(host, port),
-                    MongoCredential.createCredential(
-                            userName,
-                            authDatabase,
-                            password.toCharArray()
-                    ),
-                    MongoClientOptions.builder()
+            client = MongoClients.create(
+                    MongoClientSettings.builder()
+                            .credential(
+                                    MongoCredential.createCredential(
+                                            userName,
+                                            authDatabase,
+                                            password.toCharArray()
+                                    )
+                            )
                             .codecRegistry(CODEC_REGISTRY)
-                            .sslEnabled(false)
                             .build()
             );
 
@@ -81,17 +79,7 @@ public class MongoConnection {
 
     public MongoDatabase getDatabase(Database database) {
         if (client != null) {
-            try {
-                Method m = Mongo.class.getDeclaredMethod("createOperationExecutor");
-                m.setAccessible(true);
-                OperationExecutor executor = (OperationExecutor) m.invoke(client);
-                m.setAccessible(false);
-
-                return new MongoDatabaseImpl(client, database, executor);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                e.printStackTrace();
-                return null;
-            }
+            return client.getDatabase(database.getName());
         } else {
             throw new IllegalStateException("MongoConnection is still not connected. Use MongoConnection#connect()");
         }
