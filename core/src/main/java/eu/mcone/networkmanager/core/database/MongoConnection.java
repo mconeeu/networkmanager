@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 - 2018 Dominik Lippl, Rufus Maiwald and the MC ONE Minecraftnetwork. All rights reserved
+ * Copyright (c) 2017 - 2019 Rufus Maiwald, Dominik Lippl and the MC ONE Minecraftnetwork. All rights reserved
  * You are not allowed to decompile the code
  *
  */
@@ -7,6 +7,7 @@
 package eu.mcone.networkmanager.core.database;
 
 
+import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.client.MongoClient;
@@ -62,6 +63,9 @@ public class MongoConnection {
         } else {
             client = MongoClients.create(
                     MongoClientSettings.builder()
+                            .applyConnectionString(
+                                    new ConnectionString("mongodb://"+host+":"+port)
+                            )
                             .credential(
                                     MongoCredential.createCredential(
                                             userName,
