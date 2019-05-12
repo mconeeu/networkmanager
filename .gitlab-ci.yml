@@ -6,6 +6,8 @@ variables:
   # when running from the command line.
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+  MAVEN_JAVADOC_OPTS: "-pl :mcone-networkmanager,:client,:client-api,:core,:core-api,:host-api,:network-api"
+  MAVEN_SOURCE_OPTS: "-pl :mcone-networkmanager,:client,:client-api,:core,:core-api,:host-api,:network-api"
 
 # Cache downloaded dependencies and plugins between builds and across branches ('key: "$CI_JOB_NAME"')
 cache:
@@ -38,7 +40,7 @@ verify:master:jdk8:
   artifacts:
     name: "$CI_PROJECT_PATH-jars-packaged-$CI_JOB_NAME"
     paths:
-      - target/*
+      - target/*/*.jar
   only:
     - master
 
@@ -53,13 +55,15 @@ verify:merges:jdk8:
 deploy:jdk8:
   stage: test
   script:
-    - 'mvn $MAVEN_CLI_OPTS deploy javadoc:aggregate -pl :mcone-networkmanager,:client,:client-api,:core,:core-api,:host-api,:network-api'
+    - 'mvn $MAVEN_CLI_OPTS javadoc:aggregate-jar $MAVEN_JAVADOC_OPTS source:jar $MAVEN_SOURCE_OPTS deploy'
   only:
     - master
   artifacts:
     name: "$CI_PROJECT_PATH-javadoc"
     paths:
       - target/site/apidocs
+      - target/*/*-javadoc.jar
+      - target/*/*-sources.jar
   image: maven:3.6.1-jdk-8
 
 pages:
