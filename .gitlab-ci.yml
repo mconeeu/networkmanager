@@ -61,7 +61,7 @@ deploy:jdk8:
   artifacts:
     name: "$CI_PROJECT_PATH-javadoc"
     paths:
-      - target/apidocs
+      - $CI_PROJECT_DIR/target/apidocs
       - $CI_PROJECT_DIR/*/target/*-javadoc.jar
       - $CI_PROJECT_DIR/*/target/*-sources.jar
   image: maven:3.6.1-jdk-8
@@ -70,7 +70,7 @@ pages:
   image: busybox:latest
   stage: deploy
   script:
-    - mv target/site/apidocs public
+    - mv target/apidocs public
   dependencies:
     - deploy:jdk8
   artifacts:
