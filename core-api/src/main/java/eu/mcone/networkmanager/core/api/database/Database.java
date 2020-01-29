@@ -14,7 +14,8 @@ public enum Database {
     STATS(1, "mc1stats"),
     DATA(2, "mc1data"),
     NETWORK(3, "mc1network"),
-    CLOUD(4, "mc1cloud");
+    CLOUD(4, "mc1cloud"),
+    ONEGAMING(5, "onegaming_system");
 
     @Getter
     private int id;

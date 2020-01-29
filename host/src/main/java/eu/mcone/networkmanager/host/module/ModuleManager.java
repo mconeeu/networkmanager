@@ -45,11 +45,13 @@ public class ModuleManager implements eu.mcone.networkmanager.host.api.manager.M
         }
 
         File[] modules = MODULE_DIR.listFiles();
+        log.severe(MODULE_DIR.getAbsolutePath());
 
         if (modules != null) {
             fileLoop:
             for (File module : modules) {
                 if (module.isFile() && module.getName().endsWith(".jar")) {
+
                     try (JarFile jar = new JarFile(module)) {
                         JarEntry moduleInfoJson = jar.getJarEntry("module.json");
 

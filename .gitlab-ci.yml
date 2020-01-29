@@ -1,24 +1,19 @@
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
   # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.
-  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
   # As of Maven 3.3.0 instead of this you may define these options in `.mvn/maven.config` so the same config is used
   # when running from the command line.
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
-  MAVEN_JAVADOC_OPTS: "-pl :mcone-networkmanager,:client,:client-api,:core,:core-api,:host-api,:network-api"
-  MAVEN_SOURCE_OPTS: "-pl :mcone-networkmanager,:client,:client-api,:core,:core-api,:host-api,:network-api"
-
-# Cache downloaded dependencies and plugins between builds and across branches ('key: "$CI_JOB_NAME"')
-cache:
-  key: "$CI_JOB_NAME"
-  paths:
-    - .m2/repository
+  MAVEN_DEPLOY_OPTS: "-pl :mcone-networkmanager,:client,:client-api,:core,:core-api,:host-api,:network-api"
 
 # This will only validate and compile stuff and run e.g. maven-enforcer-plugin.
 # Because some enforcer rules might check dependency convergence and class duplications
 # we use `test-compile` here instead of `validate`, so the correct classpath is picked up.
 .validate: &validate
+  tags:
+    - maven
   stage: build
   script:
     - 'mvn $MAVEN_CLI_OPTS test-compile'
@@ -26,6 +21,8 @@ cache:
 # For merge requests do not `deploy` but only run `verify`.
 # See https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
 .verify: &verify
+  tags:
+    - maven
   stage: test
   script:
     - 'mvn $MAVEN_CLI_OPTS verify'
@@ -53,15 +50,17 @@ verify:merges:jdk8:
 # For `master` branch run `mvn deploy` automatically.
 # Uses mounted settings.xml for authenticating with mcone-repo
 deploy:jdk8:
+  tags:
+    - maven
   stage: test
   script:
-    - 'mvn $MAVEN_CLI_OPTS javadoc:aggregate-jar $MAVEN_JAVADOC_OPTS source:jar $MAVEN_SOURCE_OPTS deploy'
+    - 'mvn $MAVEN_CLI_OPTS javadoc:jar javadoc:aggregate source:jar $MAVEN_DEPLOY_OPTS'
   only:
     - master
   artifacts:
     name: "$CI_PROJECT_PATH-javadoc"
     paths:
-      - $CI_PROJECT_DIR/target/apidocs
+      - $CI_PROJECT_DIR/target/site/apidocs
       - $CI_PROJECT_DIR/*/target/*-javadoc.jar
       - $CI_PROJECT_DIR/*/target/*-sources.jar
   image: maven:3.6.1-jdk-8
@@ -70,7 +69,7 @@ pages:
   image: busybox:latest
   stage: deploy
   script:
-    - mv target/apidocs public
+    - 'mv $CI_PROJECT_DIR/target/site/apidocs $CI_PROJECT_DIR/public'
   dependencies:
     - deploy:jdk8
   artifacts:

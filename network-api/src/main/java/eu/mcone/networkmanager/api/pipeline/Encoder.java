@@ -23,7 +23,6 @@ public class Encoder extends MessageToByteEncoder<Packet> {
     @Override
     public void encode(ChannelHandlerContext ctx, Packet packet, ByteBuf out) {
         int packetID = resolver.getPacketId(packet.getClass());
-        log.finest("Encoding packet "+packet.getClass().getSimpleName()+" to "+ctx.channel().remoteAddress());
 
         if (packetID > -1) {
             out.writeInt(packetID);

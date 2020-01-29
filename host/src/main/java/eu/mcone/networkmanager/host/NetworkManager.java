@@ -88,7 +88,7 @@ public class NetworkManager extends ModuleHost {
         mongoConnection = new MongoConnection(
                 "db.mcone.eu",
                 "admin",
-                "T6KIq8gjmmF1k7futx0cJiJinQXgfguYXruds1dFx1LF5IsVPQjuDTnlI1zltpD9",
+                "Ze7OCxrVI30wmJU38TX9UmpoL8RnLPogmV3sIljcD2HQkth86bzr6JRiaDxabdt8",
                 "admin",
                 27017
         ).connect();
