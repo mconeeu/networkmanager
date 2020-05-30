@@ -5,10 +5,10 @@
  */
 
 import com.google.gson.JsonObject;
-import eu.mcone.networkmanager.api.packet.Packet;
-import eu.mcone.networkmanager.api.packet.PacketRegisterPacketClient;
-import eu.mcone.networkmanager.api.packet.interfaces.PacketResolver;
-import eu.mcone.networkmanager.api.pipeline.Encoder;
+import group.onegaming.networkmanager.api.packet.Packet;
+import group.onegaming.networkmanager.api.packet.PacketRegisterPacketClient;
+import group.onegaming.networkmanager.api.packet.interfaces.PacketResolver;
+import group.onegaming.networkmanager.api.pipeline.Encoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
