@@ -22,6 +22,10 @@ public interface ServerPacketManager {
 
     <T extends Packet> void registerPacket(NetworkModule module, Class<T> clazz, PacketHandler<T> handler);
 
+    <T extends Packet> void registerPacket(NetworkModule module, int id, Class<T> clazz, PacketHandler<T> handler);
+
+    <T extends Packet> boolean registerPacket(NetworkModule module, int id, Class<T> clazz);
+
     <T extends Packet> void registerPacket(NetworkModule module, Class<T> clazz);
 
     <T extends Packet> void registerAdditionalPacketHandler(Class<T> clazz, PacketHandler<T> handler) throws IllegalStateException;

@@ -61,6 +61,10 @@ public abstract class NetworkModule {
         }
     }
 
+    public <E extends Event> void callEvent(E event) {
+        ModuleHost.getInstance().getEventManager().callEvent(this, event);
+    }
+
     protected void registerCommand(String cmd, CommandExecutor commandExecutor) {
         ModuleHost.getInstance().getConsoleReader().registerCommand(getModuleInfo().getName(), cmd, commandExecutor);
     }

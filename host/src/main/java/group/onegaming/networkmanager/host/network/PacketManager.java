@@ -42,9 +42,9 @@ public class PacketManager implements ServerPacketManager, PacketResolver {
         handlers = new HashMap<>();
         listeners = new ArrayList<>();
 
-        registerPacket(null, ClientRegisterPacketHost.class, new ClientRegisterHandler());
-        registerPacket(null, PacketRegisterPacketClient.class);
-        registerPacket(null, ClientMessageRequestPacket.class);
+        registerPacket(null, 0, ClientRegisterPacketHost.class, new ClientRegisterHandler());
+        registerPacket(null, 1, PacketRegisterPacketClient.class);
+        registerPacket(null, 2, ClientMessageRequestPacket.class);
     }
 
     @Override
@@ -54,7 +54,19 @@ public class PacketManager implements ServerPacketManager, PacketResolver {
 
     @Override
     public <T extends Packet> void registerPacket(NetworkModule module, Class<T> clazz, PacketHandler<T> handler) {
-        if (module != null) {
+        registerPacket(module, clazz);
+        handlers.put(clazz, new HashSet<>(Collections.singletonList(handler)));
+    }
+
+    @Override
+    public <T extends Packet> void registerPacket(NetworkModule module, int id, Class<T> clazz, PacketHandler<T> handler) {
+        registerPacket(module, id, clazz);
+        handlers.put(clazz, new HashSet<>(Collections.singletonList(handler)));
+    }
+
+    @Override
+    public <T extends Packet> boolean registerPacket(NetworkModule module, int id, Class<T> clazz) {
+        if (!packetIds.containsValue(id)) {
             boolean contains;
             if (!(contains = modules.containsKey(module)) || !modules.get(module).contains(clazz)) {
                 if (contains) {
@@ -62,34 +74,25 @@ public class PacketManager implements ServerPacketManager, PacketResolver {
                 } else {
                     modules.put(module, new HashSet<>(Collections.singletonList(clazz)));
                 }
+
+                log.fine("Registering packet " + clazz.getSimpleName() + " with packet id " + id);
+                packetIds.put(clazz, id);
+                handlers.put(clazz, new HashSet<>());
+                return true;
             } else {
                 log.severe("The packet " + clazz.getSimpleName() + " was already registered");
-                return;
             }
         }
 
-        int last = (packetIds.size() > 0) ? Collections.max(packetIds.entrySet(), HashMap.Entry.comparingByValue()).getValue() : -1;
-        log.fine("Registering packet " + clazz.getSimpleName() + " with packet id " + (++last));
-        packetIds.put(clazz, last);
-        handlers.put(clazz, new HashSet<>(Collections.singletonList(handler)));
+        return false;
     }
 
     @Override
     public <T extends Packet> void registerPacket(NetworkModule module, Class<T> clazz) {
-        boolean contains;
-        if (!(contains = modules.containsKey(module)) || !modules.get(module).contains(clazz)) {
-            if (contains) {
-                modules.get(module).add(clazz);
-            } else {
-                modules.put(module, new HashSet<>(Collections.singletonList(clazz)));
-            }
-
-            int last = (packetIds.size() > 0) ? Collections.max(packetIds.entrySet(), HashMap.Entry.comparingByValue()).getValue() : -1;
-            log.fine("Registering packet " + clazz.getSimpleName() + " with packet id " + (++last));
-            packetIds.put(clazz, last);
-            handlers.put(clazz, new HashSet<>());
-        } else {
-            log.severe("The packet " + clazz.getSimpleName() + " was already registered");
+        boolean done = false;
+        Random random = new Random();
+        while (!done) {
+            done = registerPacket(module, random.nextInt(899) + 100, clazz);
         }
     }
 
@@ -104,7 +107,8 @@ public class PacketManager implements ServerPacketManager, PacketResolver {
     }
 
     @Override
-    public <T extends Packet> void registerAdditionalPacketHandler(Class<T> clazz, PacketHandler<T> handler) throws IllegalStateException {
+    public <T extends Packet> void registerAdditionalPacketHandler(Class<T> clazz, PacketHandler<T> handler) throws
+            IllegalStateException {
         if (handlers.containsKey(clazz)) {
             handlers.get(clazz).add(handler);
         } else {
@@ -152,7 +156,8 @@ public class PacketManager implements ServerPacketManager, PacketResolver {
     }
 
     @Override
-    public ChannelFuture sendClientRequest(Channel channel, ClientMessageRequestPacket packet, ClientMessageResponseListener callback) {
+    public ChannelFuture sendClientRequest(Channel channel, ClientMessageRequestPacket
+            packet, ClientMessageResponseListener callback) {
         clientRequests.put(packet.getRequestUuid(), callback);
         return send(channel, packet);
     }

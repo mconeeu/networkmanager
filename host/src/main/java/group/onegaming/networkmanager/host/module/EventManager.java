@@ -39,8 +39,10 @@ public class EventManager implements group.onegaming.networkmanager.host.api.man
         event.setModule(module);
 
         ModuleHost.getInstance().getThreadPool().execute(() -> {
-            for (Listener listener : listeners.get(event.getClass())) {
-                listener.on(event);
+            if (listeners.containsKey(event.getClass())) {
+                for (Listener listener : listeners.get(event.getClass())) {
+                    listener.on(event);
+                }
             }
         });
     }
