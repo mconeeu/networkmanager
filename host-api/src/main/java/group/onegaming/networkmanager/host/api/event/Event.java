@@ -18,7 +18,7 @@ public abstract class Event {
 
     public void setModule(NetworkModule module) {
         if (module == null) {
-            log.severe("BungeeCoreSystem instance cannot be set twice!");
+            log.severe("NetworkModule instance cannot be set twice!");
         } else {
             this.module = module;
         }
