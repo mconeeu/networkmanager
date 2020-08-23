@@ -83,11 +83,17 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>onegaming-gitlab</id>
+            <url>https://gitlab.com/api/v4/groups/applications/-/packages/maven</url>
+        </repository>
+    </repositories>
+
     <distributionManagement>
         <repository>
-            <id>mcone-systems</id>
-            <name>MC ONE Repo</name>
-            <url>https://repo.mcone.eu/repository/mcone-systems/</url>
+            <id>onegaming-gitlab</id>
+            <url>https://gitlab.onegaming.group/api/v4/projects/55/packages/maven</url>
         </repository>
     </distributionManagement>
 
