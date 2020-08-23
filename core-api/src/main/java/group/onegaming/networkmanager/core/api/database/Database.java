@@ -12,15 +12,16 @@ public enum Database {
 
     SYSTEM(0, "mc1system"),
     STATS(1, "mc1stats"),
-    DATA(2, "mc1data"),
-    NETWORK(3, "mc1network"),
-    CLOUD(4, "mc1cloud"),
-    ONEGAMING(5, "onegaming_system");
+    GAME(2, "mc1game"),
+    DATA(3, "mc1data"),
+    NETWORK(4, "mc1network"),
+    CLOUD(5, "mc1cloud"),
+    ONEGAMING(6, "onegaming_system");
 
     @Getter
-    private int id;
+    private final int id;
     @Getter
-    private String name;
+    private final String name;
 
     Database(int id, String name) {
         this.id = id;
