@@ -20,12 +20,20 @@ import org.bson.codecs.configuration.CodecRegistry;
 
 public class MongoConnection {
 
-    private CodecRegistry codecRegistry;
-
     @Getter
-    private MongoClientSettings.Builder clientSettingsBuilder;
+    private final MongoClientSettings.Builder clientSettingsBuilder;
     @Getter
     private MongoClient client;
+
+    public MongoConnection() {
+        this(
+                System.getProperty("Host") != null ? System.getProperty("Host") : "localhost",
+                System.getProperty("Username") != null ? System.getProperty("Username") : "admin",
+                System.getProperty("Password") != null ? System.getProperty("Password") : "",
+                System.getProperty("AuthDatabase") != null ? System.getProperty("AuthDatabase") : "admin",
+                System.getProperty("Port") != null ? Integer.parseInt(System.getProperty("Port")) : 27017
+        );
+    }
 
     public MongoConnection(String host, int port) {
         this(MongoClientSettings.builder()
