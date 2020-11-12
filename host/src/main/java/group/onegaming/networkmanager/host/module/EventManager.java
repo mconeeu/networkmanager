@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class EventManager implements group.onegaming.networkmanager.host.api.manager.EventManager {
 
-    private Map<Class<? extends Event>, Set<Listener<? extends Event>>> listeners;
+    private final Map<Class<? extends Event>, Set<Listener<? extends Event>>> listeners;
 
     public EventManager() {
         this.listeners = new HashMap<>();

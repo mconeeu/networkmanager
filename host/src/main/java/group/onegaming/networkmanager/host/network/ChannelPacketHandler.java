@@ -23,7 +23,7 @@ import java.util.Set;
 @Log
 public class ChannelPacketHandler extends SimpleChannelInboundHandler<Packet> implements PacketResolver {
 
-    private PacketManager manager;
+    private final PacketManager manager;
 
     ChannelPacketHandler(PacketManager manager) {
         this.manager = manager;

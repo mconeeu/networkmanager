@@ -18,7 +18,7 @@ import lombok.extern.java.Log;
 @AllArgsConstructor
 public class Encoder extends MessageToByteEncoder<Packet> {
 
-    private PacketResolver resolver;
+    private final PacketResolver resolver;
 
     @Override
     public void encode(ChannelHandlerContext ctx, Packet packet, ByteBuf out) {

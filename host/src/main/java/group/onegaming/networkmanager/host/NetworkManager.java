@@ -85,13 +85,7 @@ public class NetworkManager extends ModuleHost {
         serverBootstrap = new ServerBootstrap(packetManager);
 
         log.info("Enable progress - " + ConsoleColor.GREEN + "Start connection to MongoDatabase...");
-        mongoConnection = new MongoConnection(
-                "db.mcone.eu",
-                "admin",
-                "Ze7OCxrVI30wmJU38TX9UmpoL8RnLPogmV3sIljcD2HQkth86bzr6JRiaDxabdt8",
-                "admin",
-                27017
-        ).connect();
+        mongoConnection = new MongoConnection().connect();
 
         moduleManager.enableLoadedModules();
 

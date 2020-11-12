@@ -29,7 +29,7 @@ public class ClientPacketManager implements PacketManager, PacketResolver {
     @Getter
     Channel channel;
 
-    private Map<Class<? extends Packet>, Integer> packetIds;
+    private final Map<Class<? extends Packet>, Integer> packetIds;
     Map<String, ClientMessageResponseListener> clientRequests;
     Map<Class<? extends Packet>, Set<PacketHandler<? extends Packet>>> handlers;
 

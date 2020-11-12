@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Decoder extends ByteToMessageDecoder {
 
-    private PacketResolver resolver;
+    private final PacketResolver resolver;
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {

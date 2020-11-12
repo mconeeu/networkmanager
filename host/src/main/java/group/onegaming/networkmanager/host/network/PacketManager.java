@@ -26,7 +26,7 @@ import java.util.*;
 @Log
 public class PacketManager implements ServerPacketManager, PacketResolver {
 
-    private Map<NetworkModule, Set<Class<? extends Packet>>> modules;
+    private final Map<NetworkModule, Set<Class<? extends Packet>>> modules;
     Map<Class<? extends Packet>, Integer> packetIds;
 
     Map<Channel, String> clients;

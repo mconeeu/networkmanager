@@ -28,8 +28,8 @@ import java.util.jar.JarFile;
 public class ModuleManager implements group.onegaming.networkmanager.host.api.manager.ModuleManager {
 
     private final static File MODULE_DIR = new File(NetworkManager.HOME_DIR, "modules");
-    private Set<ModuleInfo> modules;
-    private Set<NetworkModule> loaded;
+    private final Set<ModuleInfo> modules;
+    private final Set<NetworkModule> loaded;
 
     public ModuleManager() {
         modules = new HashSet<>();
@@ -45,7 +45,6 @@ public class ModuleManager implements group.onegaming.networkmanager.host.api.ma
         }
 
         File[] modules = MODULE_DIR.listFiles();
-        log.severe(MODULE_DIR.getAbsolutePath());
 
         if (modules != null) {
             fileLoop:
