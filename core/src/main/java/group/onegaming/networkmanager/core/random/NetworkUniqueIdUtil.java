@@ -25,7 +25,8 @@ public class NetworkUniqueIdUtil implements UniqueIdUtil {
         if (mc1system.getName().equalsIgnoreCase(Database.SYSTEM.getName())) {
             this.idsCollection = mc1system.getCollection("unique_ids", UniqueIdEntry.class);
             this.random = new Random(6);
-        } else throw new IllegalArgumentException("Could not initialize NetworkUniqueIdUtil. Given database is not mc1system!");
+        } else
+            throw new IllegalArgumentException("Could not initialize NetworkUniqueIdUtil. Given database is not mc1system!");
     }
 
     public String getUniqueKey(String category) {

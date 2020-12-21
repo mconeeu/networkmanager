@@ -7,4 +7,20 @@
 package group.onegaming.networkmanager.core.api.random;
 
 public interface UniqueIdUtil {
+
+    /**
+     * Creates a unique key with the passed category and the UniqueIdType STRING.
+     * @param category The category of the key
+     * @return the generated unique key
+     */
+    String getUniqueKey(String category);
+
+    /**
+     * Generates a unique key with the passed category and UniqueIdType.
+     * @param category The category of the key
+     * @param type The UniqueIdType
+     * @return the generated unique key
+     */
+    String getUniqueKey(String category, UniqueIdType type);
+
 }

@@ -23,5 +23,4 @@ public class UniqueIdEntry {
         this.key = key;
         this.category = category;
     }
-
 }
