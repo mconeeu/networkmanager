@@ -13,7 +13,7 @@
     <groupId>group.onegaming.networkmanager</groupId>
     <artifactId>onegaming-networkmanager</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.5-SNAPSHOT</version>
+    <version>1.1.6-SNAPSHOT</version>
 
     <modules>
         <module>host-api</module>
