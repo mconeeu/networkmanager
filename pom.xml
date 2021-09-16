@@ -85,15 +85,15 @@
 
     <repositories>
         <repository>
-            <id>onegaming-gitlab</id>
-            <url>https://gitlab.onegaming.group/api/v4/groups/applications/-/packages/maven</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/mconeeu/networkmanager</url>
         </repository>
     </repositories>
 
     <distributionManagement>
         <repository>
-            <id>onegaming-gitlab</id>
-            <url>https://gitlab.onegaming.group/api/v4/projects/55/packages/maven</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/mconeeu/networkmanager</url>
         </repository>
     </distributionManagement>
 
@@ -101,7 +101,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.12</version>
+            <version>1.18.20</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

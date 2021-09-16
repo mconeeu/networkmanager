@@ -13,8 +13,6 @@ import group.onegaming.networkmanager.core.api.random.Random;
 import group.onegaming.networkmanager.core.api.random.UniqueIdType;
 import group.onegaming.networkmanager.core.api.random.UniqueIdUtil;
 
-import java.util.HashSet;
-
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 
@@ -23,12 +21,9 @@ public class NetworkUniqueIdUtil implements UniqueIdUtil {
     private final MongoCollection<UniqueIdEntry> idsCollection;
     private final Random random;
 
-    private final HashSet<String> idCache;
-
     public NetworkUniqueIdUtil(MongoDatabase mc1system) {
         if (mc1system.getName().equalsIgnoreCase(Database.SYSTEM.getName())) {
             this.idsCollection = mc1system.getCollection("unique_ids", UniqueIdEntry.class);
-            this.idCache = new HashSet<>();
             this.random = new Random(6);
         } else
             throw new IllegalArgumentException("Could not initialize NetworkUniqueIdUtil. Given database is not mc1system!");
@@ -47,23 +42,6 @@ public class NetworkUniqueIdUtil implements UniqueIdUtil {
         idsCollection.insertOne(new UniqueIdEntry(uniqueKey, category));
 
         return uniqueKey;
-    }
-
-    public String getTmpUniqueKey(UniqueIdType type, boolean cache) {
-        String uniqueKey;
-        do {
-            uniqueKey = getUniqueKey(type);
-        } while (idCache.contains(uniqueKey));
-
-        if (cache) {
-            idCache.add(uniqueKey);
-        }
-
-        return uniqueKey;
-    }
-
-    public void clearCache() {
-        idCache.clear();
     }
 
     private String getUniqueKey(UniqueIdType type) {

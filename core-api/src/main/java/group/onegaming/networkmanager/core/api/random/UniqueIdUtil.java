@@ -25,18 +25,4 @@ public interface UniqueIdUtil {
      */
     String getUniqueKey(String category, UniqueIdType type);
 
-    /**
-     * Generates a temporary unique key that is only stored at runtime of the application.
-     * If the cache is activated, it can be guaranteed that the key does not already exist.
-     *
-     * @param type  The UniqueIdType
-     * @param cache Should the key be cached?
-     * @return the generated unique key
-     */
-    String getTmpUniqueKey(UniqueIdType type, boolean cache);
-
-    /**
-     * Clears the local cache.
-     */
-    void clearCache();
 }
